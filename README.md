@@ -1,5 +1,7 @@
 # Fanorona-Game
+```
 A strategy game from Madagascar
+```
 
 ## Group members:
 	- Mendrika Henintsoa HARIMALALA (IGGLIA 3)
