@@ -8,7 +8,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "parce ./src/index.html"
+    "start": "parcel ./src/index.html"
   },
   "repository": {
     "type": "git",
