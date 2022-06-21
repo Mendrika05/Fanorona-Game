@@ -3,7 +3,7 @@ import { renderer, scene, camera, control, COLORS } from './constants';
 
 let width= window.innerWidth, height= window.innerHeight / 1.2;	// Canvas size
 let rayCaster= new Raycaster();
-let click= new Vector2();
+let click= new Vector2(), mousemove= new Vector2();
 let turn= -2;	// It is the next opposite direction
 let actualPiece;
 
@@ -75,11 +75,46 @@ const onResetCamera= () => {
 	renderer.render(scene, camera);
 } 
 
+const onMouseMove= (e) => {
+	// To change the cursor according to where it points in the canvas
+	mousemove.x= (e.clientX / width) * 2 - 1;
+	mousemove.y= - (e.clientY / height) * 2 + 1;
+
+	rayCaster.setFromCamera(mousemove, camera);
+
+	const found= rayCaster.intersectObjects(scene.children);
+
+	// Recolor the old one
+	if (found.length && found[0].object.isPiece) {
+		renderer.domElement.style.cursor= 'pointer';
+	}
+	else {
+		// console.log(mousemove);
+		renderer.domElement.style.cursor= 'default';
+	}
+}
+
+const onNightModeToggle= (nightMode, ambient) => {
+	// Check for night mode
+	if (nightMode) {
+		// Night mode
+		renderer.setClearColor(COLORS.NIGHT);
+		ambient.color.set(0xaaaaaa);	// Set ambient light
+	}
+	else {
+		// Day mode
+		renderer.setClearColor(COLORS.DAY);
+		ambient.color.set(0xffffff);	// Set ambient light
+	}
+}
+
 export {
 	width,
 	height,
 	onClick,
 	onScreenResize,
 	onTurnChange,
-	onResetCamera
+	onResetCamera,
+	onMouseMove,
+	onNightModeToggle
 }
