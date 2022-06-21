@@ -1,7 +1,9 @@
 // A module to provide the gui
 import { Fog, PlaneGeometry, DoubleSide, BoxGeometry, MeshStandardMaterial, Mesh, TextureLoader, LinearFilter, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
-import { renderer, scene, camera, width, height, control, COLORS, mainArray } from './constants';	// Import the basic utilities
+import { renderer, scene, camera,  control, COLORS, mainArray } from './constants';	// Import the basic utilities
+import { width, height } from './eventHandlers';
+import { onClick, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle } from './eventHandlers';
 import Laka from '../img/Laka.png';	// The board mark
 import Piece from './Piece';
 
@@ -48,7 +50,7 @@ function init() {
 
 	// Renderer setup
 	renderer.setSize(width, height);	// Size
-	renderer.setClearColor(COLORS.NIGHT);	// Renderer background
+	renderer.setClearColor(COLORS.DAY);	// Renderer background
 	renderer.shadowMap.enabled= true;	// Enable shadows
 
 	// The scene
@@ -64,7 +66,7 @@ function init() {
 	// The TABLE
 	/************************************************************************************************************************/
 	const plane= new Mesh(
-			new PlaneGeometry(25, 25),
+			new PlaneGeometry(15, 8),
 			new MeshStandardMaterial({
 				color: 0x3F1A0B,
 				side: DoubleSide
@@ -121,7 +123,7 @@ function init() {
 	/***************************************************************************************************************************/
 	// LIGHTS
 	/**************************************************************************************************************************/
-	const ambient= new AmbientLight(0xffffff);
+	const ambient= new AmbientLight(0xffffff);	// Day mode by default
 	const directional= new DirectionalLight(0xffffff, 1)
 	scene.add(ambient);
 	scene.add(directional);
@@ -130,10 +132,25 @@ function init() {
 	directional.position.set(-5, 4, -5);
 	/**************************************************************************************************************************/
 	// HELPERS
-	scene.add(new DirectionalLightHelper(directional));
-	scene.add(new CameraHelper(directional.shadow.camera));
-	scene.add(new AxesHelper(5));
+	// scene.add(new DirectionalLightHelper(directional));
+	// scene.add(new CameraHelper(directional.shadow.camera));
+	// scene.add(new AxesHelper(5));
 	
+	// Event Handlers
+	// HTML Elements
+	const canvas= renderer.domElement;	// The canvas
+	const nightChk= document.getElementById('night-chk');	// The night mode checkbox
+	canvas.addEventListener('click', onClick);
+	canvas.addEventListener('mousemove', onMouseMove);
+	
+	document.getElementById('change-view').addEventListener('click', onTurnChange);
+	document.getElementById('reset-camera').addEventListener('click', onResetCamera);
+	nightChk.addEventListener('change', () => {
+		onNightModeToggle(nightChk.checked, ambient);
+	});
+
+	window.addEventListener('resize', onScreenResize);
+
 	render();
 }
 
