@@ -99,7 +99,6 @@ function init() {
 	let textureLoader= new TextureLoader();
 	const tl= textureLoader.load(Laka);
 	tl.minFilter= LinearFilter;	// To avoid resizing warnings
-	// const lakaMat= new THREE.MeshStandardMaterial({color: BOARD_COLOR, map: text});
 	const mark= new Mesh(
 		new PlaneGeometry(8.25, 4.25),
 		new MeshStandardMaterial({
@@ -114,7 +113,6 @@ function init() {
 	mark.position.y= 0.13;
 	mark.receiveShadow= true;
 	mark.userData.isBoard= true;
-	// laka.userData.isBoard= true;
 	/*************************************************************************************************************************/
 
 	// THE PIECES
