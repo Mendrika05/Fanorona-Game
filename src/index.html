@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable= no">
+	<title>Fanorona - "The Malagasy boardgame"</title>
+	<style type="text/css">
+		body {
+			user-select: none;
+			margin: 0;
+		}
+		/*canvas {
+			cursor: grab;
+		}
+		canvas:active {
+			cursor: grabbing;
+		}*/
+		button, input[type= "checkbox"], label {
+			cursor: pointer;
+		}
+	</style>
+	<!-- <script type="text/javascript" src= "node_modules/three/build/three.js"></script> -->
+	<!-- <script type="text/javascript" src= "node_modules/three/examples/js/controls/OrbitControls.js"></script> -->
+</head>
+<body>
+	<canvas id= "canvas"></canvas>
+	<div id= "controllers">
+		<button id= "view-changer">Change view</button>
+		<button id= "reset-camera">Reset Cameras</button>
+		<label for= "day-chk">Day Mode</label><input type= "checkbox" id= "day-chk" value= "checked" />
+	</div>
+
+	<!-- The graph script -->
+	<script type= "module" src= "./js/gui.js"></script>
+</body>
+</html>
