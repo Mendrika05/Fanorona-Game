@@ -7,6 +7,7 @@ let click= new Vector2(), mousemove= new Vector2();
 let turn= -2;	// It is the next opposite direction
 let actualPiece;
 
+// WINDOW EVENT
 const onScreenResize= () => {
 	// Help resize the screen for more responsivity
 	// Screen size
@@ -21,6 +22,7 @@ const onScreenResize= () => {
 	renderer.render(scene, camera);	// Render
 }
 
+// BOARD EVENTS
 const onClick= (e) => {
 	// When a piece is clicked
 	click.x= (e.clientX / width) * 2 - 1;
@@ -33,16 +35,43 @@ const onClick= (e) => {
 	// Recolor the old one
 	if (actualPiece) {
 		actualPiece.material.color.set(actualPiece.value == 1? COLORS.GREY: COLORS.WHITE);
+		actualPiece.drop();
 		actualPiece= undefined;
 	}
-
-	if (found.length && found[0].object.isPiece) {
+	else if (found.length && found[0].object.isPiece) {
 		actualPiece= found[0].object;	// Set the actual piece
 		actualPiece.material.color.set(COLORS.SELECTION);	// Color it
 	}
 }
 
+const onMouseMove= (e) => {
+	// To change the cursor according to where it points in the canvas
+	mousemove.x= (e.clientX / width) * 2 - 1;
+	mousemove.y= - (e.clientY / height) * 2 + 1;
 
+	rayCaster.setFromCamera(mousemove, camera);
+
+	const found= rayCaster.intersectObjects(scene.children);
+
+	// Change pointer
+	if (found.length && found[0].object.isPiece) {
+		renderer.domElement.style.cursor= 'pointer';
+	}
+	else {
+		renderer.domElement.style.cursor= 'default';
+	}
+
+	// Drag the selected piece
+	if (actualPiece) {
+		if (found.length) {
+			for (intersection of found) {
+				actualPiece.drag(intersection);	// Drag the piece
+			}
+		}
+	}
+}
+
+// CONTROLLERS
 const onTurnChange= () => {
 	// Turn the camera
 	if (parseInt(camera.position.z) != parseInt(turn)) {
@@ -75,25 +104,6 @@ const onResetCamera= () => {
 	renderer.render(scene, camera);
 } 
 
-const onMouseMove= (e) => {
-	// To change the cursor according to where it points in the canvas
-	mousemove.x= (e.clientX / width) * 2 - 1;
-	mousemove.y= - (e.clientY / height) * 2 + 1;
-
-	rayCaster.setFromCamera(mousemove, camera);
-
-	const found= rayCaster.intersectObjects(scene.children);
-
-	// Recolor the old one
-	if (found.length && found[0].object.isPiece) {
-		renderer.domElement.style.cursor= 'pointer';
-	}
-	else {
-		// console.log(mousemove);
-		renderer.domElement.style.cursor= 'default';
-	}
-}
-
 const onNightModeToggle= (nightMode, ambient) => {
 	// Check for night mode
 	if (nightMode) {
@@ -109,12 +119,10 @@ const onNightModeToggle= (nightMode, ambient) => {
 }
 
 export {
-	width,
-	height,
 	onClick,
 	onScreenResize,
 	onTurnChange,
 	onResetCamera,
 	onMouseMove,
-	onNightModeToggle
+	onNightModeToggle,
 }
