@@ -19,6 +19,17 @@ const Piece= class Piece extends Mesh {
 		this.position.set(x, 0.19, y);	// Set it on top of the board and x and y are , in the 3d world, x and z respectively
 		this.index= index;	// The position in the current array
 	}
+	drag(intersection) {
+		// Drag a piece according to the intersection
+		if (intersection.object.userData.isBoard) {	// If we are on the board
+			// Set the piece position
+			this.position.set(intersection.point.x, 0.3, intersection.point.z);
+		}
+	}
+	drop() {
+		// Drop the piece on the board
+		this.position.y= 0.19;
+	}
 }
 
 export default Piece;
