@@ -2,13 +2,12 @@
 import { Fog, PlaneGeometry, DoubleSide, BoxGeometry, MeshStandardMaterial, Mesh, TextureLoader, LinearFilter, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import { renderer, scene, camera,  control, COLORS, mainArray } from './constants';	// Import the basic utilities
-import { width, height } from './eventHandlers';
 import { onClick, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle } from './eventHandlers';
 import Laka from '../img/Laka.png';	// The board mark
 import Piece from './Piece';
 
-function placePieces() {
-	// Placing pieces
+function placePieces(board) {
+	// Placing pieces on the board
 	let piece;
 	for (let i= 0; i < 5; i++) {	// By line
 		for (let j= 0; j < 9; j++) {	// By column
@@ -19,7 +18,7 @@ function placePieces() {
 			}
 			
 			// Color setting
-			let value= i < 2? -1: i > 2? 1: j < 4? [1, -1][j % 2]: [1, -1][(j + 1) % 2];	// -1 is White (player 2) and 1 is Black (player 1)
+			let value= i < 2? -1: i > 2? 1: j < 4? [-1, 1][j % 2]: [1, -1][j % 2];	// -1 is White (player 2) and 1 is Black (player 1)
 			
 			/* POSITIONS */
 			// x= -8 + j * 2;	// ========> j= x + 8 / 2
@@ -31,8 +30,7 @@ function placePieces() {
 				=> pos= i * col + j where col is the number of column (here 9)
 				THIS IS TO MARK THE POSITION OF THE PIECE IN THE MOVE ARRAY
 			*/
-			piece= new Piece(value, -4 + j, -2 + i, i * 9 + j);	// Piece(value, x, y, index)
-			scene.add(piece);
+			piece= new Piece(board, value, -4 + j, -2 + i, i * 9 + j);	// Piece(parentBoard, value, x, y, index)
 			mainArray.push(piece);	// The main array store the pieces to be manipulated in the logics
 		}
 	}
@@ -49,7 +47,7 @@ function init() {
 	// Initialization of the GUI
 
 	// Renderer setup
-	renderer.setSize(width, height);	// Size
+	renderer.setSize(window.innerWidth, window.innerHeight / 1.2);	// Size
 	renderer.setClearColor(COLORS.DAY);	// Renderer background
 	renderer.shadowMap.enabled= true;	// Enable shadows
 
@@ -92,7 +90,6 @@ function init() {
 	// Shadow
 	board.receiveShadow= true;
 	board.castShadow= true;
-	board.userData.isBoard= true;	// Tell that it is the board
 
 	// Board Marks
 	// The image for the board marks
@@ -112,12 +109,12 @@ function init() {
 	mark.rotation.x= -0.5 * Math.PI;// Rotate the plane
 	mark.position.y= 0.13;
 	mark.receiveShadow= true;
-	mark.userData.isBoard= true;
+	mark.userData.isBoard= true;	// It is the board
 	/*************************************************************************************************************************/
 
 	// THE PIECES
 	/***************************************************************************************************************************/
-	placePieces();
+	placePieces(board);
 	/***************************************************************************************************************************/
 	// LIGHTS
 	/**************************************************************************************************************************/
