@@ -164,9 +164,11 @@ const Piece= class Piece extends Mesh {
 		// 	}
 		// }
 		if (intersection.object.userData.droppable) {	// Check if it is a valid move
-			this.position.set(parseInt(intersection.point.x), 0.19, parseInt(intersection.point.z));
+			let x= parseInt(intersection.point.x);
+			let z= parseInt(intersection.point.z);
+			this.position.set(x, 0.19, z);
 			if (this.moves.areCaptures) {
-				this.capture();
+				this.capture(z * 9 + x + 22);	// We pass the index from where we capture which is given by the above formula as z * 9 + x + 22
 			}
 		}
 		else {
@@ -229,8 +231,20 @@ const Piece= class Piece extends Mesh {
 		this.moves.areCaptures= captures.length? true: false;	// The type of moves
 		this.moves.list= captures.length? captures: normalMoves;	// The list of moves
 	}
-	capture() {
+	capture(index) {
 		// To capture
+		let displacement= this.index - index;	// 9: vertical, 1: horizontal, 10: left diagonal, 8: right diagonal
+		let pos= index;	// It is the index where we will put the piece
+		console.log(this.index, index);
+		console.log('displacement ' + displacement);
+
+		let move= displacement == 9? up: null;
+
+		pos= move(pos, 1);
+		while (pos != null) {
+			this.parentBoard.eat(pos);	// Take pieces from the board
+			pos= move(pos, 1);
+		}
 	}
 }
 

@@ -116,8 +116,9 @@ class Board extends Mesh {
 		for (let mark of this.marks)
 			this.remove(mark);
 	}
-	capture() {
-		this.remove();
+	eat(index) {
+		this.remove(this.game[index]);
+		this.game[index]= 0;	// Free the position
 	}
 	swapTurn() {
 		// Swap turn
