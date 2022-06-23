@@ -1,6 +1,6 @@
 // Definition of the Board class
-import { PlaneGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, Vector2 } from 'three';
-import { COLORS } from './constants';
+import { PlaneGeometry, CircleGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, Vector2 } from 'three';
+import { COLORS, turn } from './constants';
 import { actualPiece } from './eventHandlers';
 import Piece from './Piece'
 import Laka from '../img/Laka.png';
@@ -64,35 +64,90 @@ class Board extends Mesh {
 				this.game.push(piece);	// The main array store the pieces to be manipulated in the logics
 			}
 		}
+		// console.log(this.game);
+		this.processMoves();
 	}
 	updateColor() {
-		this.game.forEach(piece => {
-			if (piece) piece.updateColor();
-		});
+		let changing= -1;	// The material to change first
+		for (let piece of this.game) {
+			if (piece && piece.value == changing ) {
+				piece.updateColor();
+				if (changing == -1)	// Change the material to change
+					changing= 1;
+				else
+					break;	// done changing material
+			} 
+		}
 	}
 	getBoardPosition(index) {
 		let lig= parseInt(index / 9);
 		let col= index % 9;
+		// console.log(lig, col);
 
-		return new Vector2(lig - 2, col -4);	// x et z, ras de board 
+		return new Vector2(col - 4,  lig - 2);	// x and z respectively in the 3d representation 
+	}
+	check() {
+		// Check if it is a valid moving piece
+		return this.movingList.includes(actualPiece);
 	}
 	color() {
-		console.log(actualPiece);
+		// Color the valid path of the actual piece
+		this.marks= [];
+		let circleGeo= new CircleGeometry(0.23, 60);
+		let circleMat= new MeshBasicMaterial({color: COLORS.SELECTION})
 		if (actualPiece) {
-			console.log(actualPiece);
-			for (let move of actualPiece.moves) {
-				let circle= new Mesh(new BoxGeometry(0.1, 10, 0.1), new MeshBasicMaterial({color: 0xff0000}))
+			for (let move of actualPiece.moves.list) {
+				console.log(actualPiece.moves);
+				let circle= new Mesh(circleGeo, circleMat);
 				let position= this.getBoardPosition(move);
-				circle.position.set(position.x, 0.25, position.y);
+				// console.log(position);
+				circle.rotation.x= -0.5 * Math.PI;	// Radian rotation
+				circle.position.set(position.x, 0.14, position.y);
+				circle.userData.droppable= true;	// To set the droppable area
 				this.add(circle);
+				this.marks.push(circle);
 			}
 		}
+	}
+	clear() {
+		// Opposite to the color method
+		this.marks[0].geometry.dispose();
+		this.marks[0].material.dispose();
+		for (let mark of this.marks)
+			this.remove(mark);
 	}
 	capture() {
 		this.remove();
 	}
+	swapTurn() {
+		// Swap turn
+		turn*= -1;
+	}
+	getTurn() {
+		// Return a list of the pieces having the current turn
+		return this.game.filter((piece) => {
+			return piece && piece.value == turn;
+		})
+	}
 	processMoves() {
-		// 
+		// To help process move at start
+		let captureMode= false;
+		let movingList= this.getTurn();	// List all valid moves
+		// Process all valid moves
+		for (let piece of movingList) {
+			if (piece) {
+				piece.processMoves();
+				if (piece.moves.areCaptures)
+					captureMode= true;	// Toggle capture
+			}
+		}
+		// If capture mode, only allow captures
+		if (captureMode) {
+			movingList= movingList.filter(piece => {
+				return piece.moves.areCaptures;
+			});
+		}
+		this.movingList= movingList;
 	}
 }
 

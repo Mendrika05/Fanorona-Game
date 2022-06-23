@@ -1,5 +1,5 @@
 import { Vector2, Raycaster } from 'three';
-import { renderer, scene, camera, control, COLORS, player1Color, player2Color } from './constants';
+import { renderer, scene, camera, control, COLORS, player1Color, player2Color, turn } from './constants';
 
 let width= window.innerWidth, height= window.innerHeight / 1.2;	// Canvas size
 let rayCaster= new Raycaster();
@@ -35,13 +35,17 @@ const onClick= (e, board) => {
 	// Recolor the old one
 	if (actualPiece) {
 		actualPiece.material.color.set(actualPiece.value == 1? COLORS.GREY: COLORS.WHITE);
-		actualPiece.drop();
-		actualPiece= undefined;
+		actualPiece.drop(found[1]);	// Drop
+		actualPiece= undefined;	// Take focus out
 	}
-	else if (found.length && found[0].object.isPiece) {
+	else if (found.length && found[0].object.isPiece && found[0].object.value == turn) {
 		actualPiece= found[0].object;	// Set the actual piece
-		board.color();
-		actualPiece.select();	// Color it
+		if (board.check()) {	// After checking, we see if it is a valid move
+			actualPiece.select();	// Color it
+			board.color();
+		}
+		else
+			actualPiece= undefined;
 	}
 }
 
