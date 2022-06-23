@@ -42,6 +42,7 @@ const onClick= (e, board) => {
 		actualPiece= found[0].object;	// Set the actual piece
 		board.color();
 		actualPiece.select();	// Color it
+		
 	}
 }
 
