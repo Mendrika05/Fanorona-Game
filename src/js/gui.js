@@ -75,8 +75,8 @@ const init= () => {
 	player2Color.value= "#ffffff";
 	const canvas= renderer.domElement;	// The canvas
 	const nightChk= document.getElementById('night-chk');	// The night mode checkbox
-	canvas.addEventListener('click', onClick);
-	canvas.addEventListener('mousemove', onMouseMove);
+	canvas.addEventListener('click', (event) => onClick(event, board));
+	canvas.addEventListener('mousemove', (event) => onMouseMove(event, board));
 	
 	document.getElementById('change-view').addEventListener('click', onTurnChange);
 	document.getElementById('reset-camera').addEventListener('click', onResetCamera);

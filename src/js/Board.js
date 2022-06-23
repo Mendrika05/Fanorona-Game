@@ -1,6 +1,7 @@
 // Definition of the Board class
-import { PlaneGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh } from 'three';
+import { PlaneGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, Vector2 } from 'three';
 import { COLORS } from './constants';
+import { actualPiece } from './eventHandlers';
 import Piece from './Piece'
 import Laka from '../img/Laka.png';
 
@@ -69,7 +70,30 @@ class Board extends Mesh {
 			if (piece) piece.updateColor();
 		});
 	}
-}
+	getBoardPosition(index) {
+		let lig= parseInt(index / 9);
+		let col= index % 9;
 
+		return new Vector2(lig - 2, col -4);	// x et z, ras de board 
+	}
+	color() {
+		console.log(actualPiece);
+		if (actualPiece) {
+			console.log(actualPiece);
+			for (let move of actualPiece.moves) {
+				let circle= new Mesh(new BoxGeometry(0.1, 10, 0.1), new MeshBasicMaterial({color: 0xff0000}))
+				let position= this.getBoardPosition(move);
+				circle.position.set(position.x, 0.25, position.y);
+				this.add(circle);
+			}
+		}
+	}
+	capture() {
+		this.remove();
+	}
+	processMoves() {
+		// 
+	}
+}
 
 export default Board;

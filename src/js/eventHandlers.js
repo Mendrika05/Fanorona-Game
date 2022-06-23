@@ -23,14 +23,14 @@ const onScreenResize= () => {
 }
 
 // BOARD EVENTS
-const onClick= (e) => {
+const onClick= (e, board) => {
 	// When a piece is clicked
 	click.x= (e.clientX / width) * 2 - 1;
 	click.y= - (e.clientY / height) * 2 + 1;
 
 	rayCaster.setFromCamera(click, camera);
 
-	const found= rayCaster.intersectObjects(scene.children);
+	const found= rayCaster.intersectObjects(board.children);
 
 	// Recolor the old one
 	if (actualPiece) {
@@ -40,18 +40,19 @@ const onClick= (e) => {
 	}
 	else if (found.length && found[0].object.isPiece) {
 		actualPiece= found[0].object;	// Set the actual piece
+		board.color();
 		actualPiece.select();	// Color it
 	}
 }
 
-const onMouseMove= (e) => {
+const onMouseMove= (e, board) => {
 	// To change the cursor according to where it points in the canvas
 	mousemove.x= (e.clientX / width) * 2 - 1;
 	mousemove.y= - (e.clientY / height) * 2 + 1;
 
 	rayCaster.setFromCamera(mousemove, camera);
 
-	const found= rayCaster.intersectObjects(scene.children);
+	const found= rayCaster.intersectObjects(board.children);
 
 	// Change pointer
 	if (found.length && found[0].object.isPiece) {
@@ -64,7 +65,7 @@ const onMouseMove= (e) => {
 	// Drag the selected piece
 	if (actualPiece) {
 		if (found.length) {
-			for (intersection of found) {
+			for (let intersection of found) {
 				actualPiece.drag(intersection);	// Drag the piece
 			}
 		}
@@ -134,5 +135,6 @@ export {
 	onMouseMove,
 	onNightModeToggle,
 	changeColorPlayer1,
-	changeColorPlayer2
+	changeColorPlayer2,
+	actualPiece
 }
