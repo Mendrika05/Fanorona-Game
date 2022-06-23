@@ -64,7 +64,7 @@ const onMouseMove= (e) => {
 	// Drag the selected piece
 	if (actualPiece) {
 		if (found.length) {
-			for (intersection of found) {
+			for (let intersection of found) {
 				actualPiece.drag(intersection);	// Drag the piece
 			}
 		}
