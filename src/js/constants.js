@@ -1,12 +1,13 @@
 import { WebGLRenderer, Scene, PerspectiveCamera } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-let mainArray= [];
+let player1Color= document.getElementById('player-1');
+let player2Color= document.getElementById('player-2');
 
 // Colors definitions
 const COLORS= {
-		WHITE: 0xffffff,
-		GREY: 0x333333,
+		PLAYER1: 0x333333,
+		PLAYER2: 0xffffff,
 		SELECTION: 0xE4D814,
 		BOARD: 0x83390D,
 		NIGHT: 0x0B0848,
@@ -28,5 +29,6 @@ export {
 	renderer,
 	camera,
 	control,
-	mainArray
+	player1Color,
+	player2Color
 };

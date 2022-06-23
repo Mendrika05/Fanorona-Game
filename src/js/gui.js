@@ -1,40 +1,11 @@
 // A module to provide the gui
 import { Fog, PlaneGeometry, DoubleSide, BoxGeometry, MeshStandardMaterial, Mesh, TextureLoader, LinearFilter, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
-import { renderer, scene, camera,  control, COLORS, mainArray } from './constants';	// Import the basic utilities
-import { onClick, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle } from './eventHandlers';
-import Laka from '../img/Laka.png';	// The board mark
-import Piece from './Piece';
+import { renderer, scene, camera,  control, COLORS, player1Color, player2Color } from './constants';	// Import the basic utilities
+import { onClick, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
+import Board from './Board';
 
-function placePieces(board) {
-	// Placing pieces on the board
-	let piece;
-	for (let i= 0; i < 5; i++) {	// By line
-		for (let j= 0; j < 9; j++) {	// By column
-			if (i == 2 && j == 4) {
-				// Skip the center of the board
-				mainArray.push(0);
-				continue;
-			}
-			
-			// Color setting
-			let value= i < 2? -1: i > 2? 1: j < 4? [-1, 1][j % 2]: [1, -1][j % 2];	// -1 is White (player 2) and 1 is Black (player 1)
-			
-			/* POSITIONS */
-			// x= -8 + j * 2;	// ========> j= x + 8 / 2
-			// y= -4 + i * 2;	// ========> i= y + 4 / 2
-			/*
-				In an array, to store a 5*9 matrix, we can use the following correspondance:
-				let i be the line in the matrix and j be the column
-				pos: the index in the corresponding array would be given by the formula
-				=> pos= i * col + j where col is the number of column (here 9)
-				THIS IS TO MARK THE POSITION OF THE PIECE IN THE MOVE ARRAY
-			*/
-			piece= new Piece(board, value, -4 + j, -2 + i, i * 9 + j);	// Piece(parentBoard, value, x, y, index)
-			mainArray.push(piece);	// The main array store the pieces to be manipulated in the logics
-		}
-	}
-}
+const board= new Board();
 
 function render() {
 	// The render
@@ -43,7 +14,7 @@ function render() {
 	renderer.render(scene, camera);
 }
 
-function init() {
+const init= () => {
 	// Initialization of the GUI
 
 	// Renderer setup
@@ -78,44 +49,10 @@ function init() {
 
 	// THE BOARDS
 	/********************************************************************************************************************/
-	// The Board
-	const boardGeo= new BoxGeometry(9, 0.25, 5);	// Geometry (x: width, y: height, z: depth)
-	const boardMat= new MeshStandardMaterial({
-		color: COLORS.BOARD
-	});
-	const board= new Mesh(boardGeo, boardMat);
-	scene.add(board);
-	
-	board.position.y= 0.125;
-	// Shadow
-	board.receiveShadow= true;
-	board.castShadow= true;
-
-	// Board Marks
-	// The image for the board marks
-	let textureLoader= new TextureLoader();
-	const tl= textureLoader.load(Laka);
-	tl.minFilter= LinearFilter;	// To avoid resizing warnings
-	const mark= new Mesh(
-		new PlaneGeometry(8.25, 4.25),
-		new MeshStandardMaterial({
-			color: COLORS.BOARD,
-			map: tl
-		})
-	);
-	board.add(mark);
-
-	// Mark configuration
-	mark.rotation.x= -0.5 * Math.PI;// Rotate the plane
-	mark.position.y= 0.13;
-	mark.receiveShadow= true;
-	mark.userData.isBoard= true;	// It is the board
-	/*************************************************************************************************************************/
-
-	// THE PIECES
+	scene.add(board);	// Add the Board
+	board.init();	// Place the pieces
 	/***************************************************************************************************************************/
-	placePieces(board);
-	/***************************************************************************************************************************/
+
 	// LIGHTS
 	/**************************************************************************************************************************/
 	const ambient= new AmbientLight(0xffffff);	// Day mode by default
@@ -133,6 +70,9 @@ function init() {
 	
 	// Event Handlers
 	// HTML Elements
+	// Reset the colorpicker elements
+	player1Color.value= "#333333";
+	player2Color.value= "#ffffff";
 	const canvas= renderer.domElement;	// The canvas
 	const nightChk= document.getElementById('night-chk');	// The night mode checkbox
 	canvas.addEventListener('click', onClick);
@@ -143,10 +83,20 @@ function init() {
 	nightChk.addEventListener('change', () => {
 		onNightModeToggle(nightChk.checked, ambient);
 	});
-
+	
+	
+	player1Color.addEventListener('change', () => {
+		changeColorPlayer1();
+		board.updateColor();
+	});
+	player2Color.addEventListener('change', () => {
+		changeColorPlayer2();
+		board.updateColor();
+	});
+ 
 	window.addEventListener('resize', onScreenResize);
 
 	render();
 }
 
-init();
+init()

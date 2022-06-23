@@ -7,10 +7,9 @@ const pieceGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 60);
 const Piece= class Piece extends Mesh {
 	constructor(parentBoard, value= 1, x= 0, y= 0, index) {
 		super(pieceGeometry, new MeshStandardMaterial({
-				color: value == 1? COLORS.GREY: COLORS.WHITE	// Setting the piece color
+				color: value == 1? COLORS.PLAYER1: COLORS.PLAYER2	// Setting the piece color
 			})
 		);	// Parent constructor
-
 		parentBoard.add(this);	// Add it to the parent board
 
 		this.castShadow= true;	// Shadow
@@ -29,6 +28,18 @@ const Piece= class Piece extends Mesh {
 	drop() {
 		// Drop the piece on the board
 		this.position.y= 0.19;
+		this.updateColor();
+	}
+	select() {
+		this.material.color.set(COLORS.SELECTION);
+	}
+	// Color manipulation
+	updateColor() {
+		this.material.color.set(this.value == 1? COLORS.PLAYER1: COLORS.PLAYER2); 
+	}
+	
+	moveTo(index) {
+
 	}
 }
 

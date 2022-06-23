@@ -1,5 +1,5 @@
 import { Vector2, Raycaster } from 'three';
-import { renderer, scene, camera, control, COLORS } from './constants';
+import { renderer, scene, camera, control, COLORS, player1Color, player2Color } from './constants';
 
 let width= window.innerWidth, height= window.innerHeight / 1.2;	// Canvas size
 let rayCaster= new Raycaster();
@@ -40,7 +40,7 @@ const onClick= (e) => {
 	}
 	else if (found.length && found[0].object.isPiece) {
 		actualPiece= found[0].object;	// Set the actual piece
-		actualPiece.material.color.set(COLORS.SELECTION);	// Color it
+		actualPiece.select();	// Color it
 	}
 }
 
@@ -118,6 +118,14 @@ const onNightModeToggle= (nightMode, ambient) => {
 	}
 }
 
+const changeColorPlayer1= () => {
+	COLORS.PLAYER1= player1Color.value;
+}
+
+const changeColorPlayer2= () => {
+	COLORS.PLAYER2= player2Color.value;
+}
+
 export {
 	onClick,
 	onScreenResize,
@@ -125,4 +133,6 @@ export {
 	onResetCamera,
 	onMouseMove,
 	onNightModeToggle,
+	changeColorPlayer1,
+	changeColorPlayer2
 }
