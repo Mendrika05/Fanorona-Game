@@ -78,8 +78,8 @@ const init= () => {
 	canvas.addEventListener('click', (event) => onClick(event, board));
 	canvas.addEventListener('mousemove', (event) => onMouseMove(event, board));
 	
-	document.getElementById('change-view').addEventListener('click', onTurnChange);
-	document.getElementById('reset-camera').addEventListener('click', onResetCamera);
+	// document.getElementById('change-view').addEventListener('click', onTurnChange);
+	// document.getElementById('reset-camera').addEventListener('click', onResetCamera);
 	nightChk.addEventListener('change', () => {
 		onNightModeToggle(nightChk.checked, ambient);
 	});

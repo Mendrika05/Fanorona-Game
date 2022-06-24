@@ -4,9 +4,9 @@
   "description": "```\r A strategy game from Madagascar\r ```",
   "main": "index.js",
   "dependencies": {
+    "parcel": "^2.6.2",
     "three": "^0.141.0"
   },
-  "devDependencies": {},
   "scripts": {
     "start": "parcel ./src/index.html"
   },

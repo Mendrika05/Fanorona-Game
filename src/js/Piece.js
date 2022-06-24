@@ -1,37 +1,23 @@
 // Definition of the Piece class
-import { CylinderGeometry, MeshStandardMaterial, Vector2, Mesh } from 'three';
+import { CylinderGeometry, MeshStandardMaterial, MeshBasicMaterial, CircleGeometry, Vector2, Mesh } from 'three';
 import { COLORS } from './constants';
 
 const pieceGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 60);
 const pieceMaterial1= new MeshStandardMaterial({color: COLORS.PLAYER1});
 const pieceMaterial2= new MeshStandardMaterial({color: COLORS.PLAYER2});
+const markerGeo= new CircleGeometry(0.25, 60);
+const markerMat= new MeshBasicMaterial({color: COLORS.SELECTION});
 
 // We consider from bottom to top for diagonals
-function toCoord(index) {
-	return [parseInt(index / 9), index % 9]
-}
+// function toCoord(index) {
+// 	return [parseInt(index / 9), index % 9]
+// }
 
-function toIndex(position) {
-	// Return null if we tresspassed to board
-	if (position[0] == 0 || position[0] == 6 || position[1] == 0 || position[1] == 10)	// Border of the board
-		return null;
-	return 9 * position[0] + position[1];
-}
-// To move around in the array given an index and a step
-// const mover= {
-// 	cross: (index, step= 1) => {
-// 		switch (index) 
-// 		return [
-// 			toIndex(toCoord(index - step * 9)), toIndex(toCoord(index + step * 9)),	// Vertical
-// 			toIndex(toCoord(index - step * 1)), toIndex(toCoord(index + step * 1))	// Horizontal
-// 			];
-// 	},
-// 	diagonal: (index, step= 1) => {
-// 		return [
-// 			toIndex(toCoord(index - step * 10)), toIndex(toCoord(index + step * 10)),	// Left from bottom to top
-// 			toIndex(toCoord(index - step * 8)), toIndex(toCoord(index + step * 8))	// Right from bottom to top
-// 			];
-// 	}
+// function toIndex(position) {
+// 	// Return null if we tresspassed to board
+// 	if (position[0] == 0 || position[0] == 6 || position[1] == 0 || position[1] == 10)	// Border of the board
+// 		return null;
+// 	return 9 * position[0] + position[1];
 // }
 // MOVES
 function up(index, step= 1) {
@@ -106,8 +92,8 @@ const mover= {
 	},
 	diagonal: (index, step= 1) => {
 		return [
-			upperLeft(index, step), upperRight(index, step),	// Left from bottom to top
-			lowerLeft(index, step), lowerRight(index, step)	// Right from bottom to top
+			upperLeft(index, step), lowerRight(index, step),	// Left from bottom to top
+			upperRight(index, step), lowerLeft(index, step)	// Right from bottom to top
 		];
 	}
 }
@@ -132,7 +118,12 @@ const Piece= class Piece extends Mesh {
 		this.isPiece= true;	// To say that it is a piece
 		this.position.set(x, 0.19, y);	// Set it on top of the board and x and y are , in the 3d world, x and z respectively
 		this.index= index;	// The position in the current array
-		this.moves= {};	// Informations about the valid moves
+		this.moves= {
+			areCaptures: false,
+			series: [],
+			list: [],
+		};	// Informations about the valid moves
+		this.displacement= 0;
 	}
 	drag(intersection) {
 		// Drag a piece according to the intersection
@@ -142,8 +133,6 @@ const Piece= class Piece extends Mesh {
 		}
 	}
 	drop(intersection) {
-		// Drop the piece on the board
-		// Turn intersection into array index
 		/*
 			index= lig * 9 + col;
 			lig= index / 9
@@ -157,28 +146,42 @@ const Piece= class Piece extends Mesh {
 			==> index == (intersection.point.z * 9) + intersection.point.x + 22
 				
 		*/
-		// if (this.moves.list.includes(parseInt((intersection.point.z * 9) + intersection.point.x + 22))) {	// Check if it is a valid move
-		// 	this.position.set(parseInt(intersection.point.x), 0.19, parseInt(intersection.point.z));
-		// 	if (this.moves.areCaptures) {
-		// 		this.capture();
-		// 	}
-		// }
 		if (intersection.object.userData.droppable) {	// Check if it is a valid move
-			let x= parseInt(intersection.point.x);
-			let z= parseInt(intersection.point.z);
+			let x= intersection.object.position.x;
+			let z= intersection.object.position.z;
+			this.clear();
 			this.position.set(x, 0.19, z);
 			if (this.moves.areCaptures) {
 				this.capture(z * 9 + x + 22);	// We pass the index from where we capture which is given by the above formula as z * 9 + x + 22
+				this.captureDone= true;
+			}
+			// Move it in the game array
+			this.moves.series.push(this.index);	// Save already taken paths
+			this.parentBoard.game[this.index]= 0;
+			this.index=	z * 9 + x + 22; // Set new index
+			this.parentBoard.game[this.index]= this;
+
+			// Recalculate moves
+			this.processMoves();
+			if (this.moves.list.length && this.parentBoard.turnCount >= 2 && this.normal < 1) {
+				// Continue moving
+				this.select();
+				this.resetPosition();
+				return false;
+			}
+			else {
+				this.updateColor();
+				this.parentBoard.swapTurn();
+				return true;
 			}
 		}
 		else {
 			// Drop at the start position
+			this.updateColor();
 			this.resetPosition();
+			this.clear();
+			return true;
 		}
-
-		this.updateColor();	// Color updates
-		// Clear the board
-		this.parentBoard.clear();
 	}
 
 	resetPosition() {
@@ -194,6 +197,8 @@ const Piece= class Piece extends Mesh {
 	select() {
 		// Change the individual color of the selected element
 		this.material= new MeshStandardMaterial({color: COLORS.SELECTION});
+		this.parentBoard.actual= this;
+		this.color();
 	}
 	updateColor() {
 		// Update the color
@@ -210,40 +215,196 @@ const Piece= class Piece extends Mesh {
 			seconds.push(...mover.diagonal(this.index, 2));
 		}
 
-		if (this.index == 23)
-			console.log(seconds);
-		// Process the moves
 		for (let i= 0; i < positions.length; i++) {
 			if (positions[i] !== null) {
-				let piece= this.parentBoard.game[positions[i]];
+				let piece= this.parentBoard.game[positions[i]];	// Check for free place
+
 				if (!piece) {
 					// Can move here beacuse it's 0
+					let second= seconds[i];	// The place after next to the free one
+					let capt= [];	// [collision, aspiration]: null if no collision nor aspiration
 					if (!captures.length)	// If we don't have valid captures yet
 						normalMoves.push(positions[i]);
-					if (seconds[i] !== null && this.parentBoard.game[seconds[i]] && this.parentBoard.game[seconds[i]].value != this.value) {
+
+					if (second !== null && this.parentBoard.game[second] && this.parentBoard.game[second].value != this.value) {
 						// If not outside the board and there piece is a capturable piece opposed to us
-						captures.push(positions[i]);	// THIS IS A CAPTURE
+						capt.push(positions[i]);	// THIS IS A CAPTURE BY COLLISION
 					}
+					else capt.push(null);
+
+					if (i % 2 == 0) {
+						// We have opposite direction going by sequencial pairs
+						let aspiration= positions[i+1];
+						if (aspiration !== null && this.parentBoard.game[aspiration].isPiece && this.parentBoard.game[aspiration].value != this.value) {
+							// If not outside the board and there piece is a capturable piece opposed to us
+							capt.push(positions[i]);	// THIS IS A CAPTURE BY COLLISION
+						}
+						else capt.push(null);
+					}
+					else {
+						let aspiration= positions[i-1];
+						if (aspiration !== null && this.parentBoard.game[aspiration] && this.parentBoard.game[aspiration].value != this.value) {
+							// If not outside the board and there piece is a capturable piece opposed to us
+							capt.push(positions[i]);	// THIS IS A CAPTURE BY COLLISION
+						}
+						else capt.push(null);
+					}
+
+					if (capt[0] !== null || capt[1] !== null)
+						// Add the captures possibilities to the captures array
+						captures.push(capt);
+
 				}
 			}
 		}
 		// Setting moves according to captures' length
 		this.moves.areCaptures= captures.length? true: false;	// The type of moves
-		this.moves.list= captures.length? captures: normalMoves;	// The list of moves
+		this.moves.list= captures.length? captures: normalMoves;	// N.B. Captures go by pair of (collision, aspiration)
+		this.filterMoves();
 	}
-	capture(index) {
+	filterMoves() {
+		// Takeout places where we already went
+		if (this.moves.areCaptures) {
+			this.moves.list= this.moves.list.filter(([collision, aspiration]) => {
+				// Series
+				if (collision != null && this.moves.series.includes(collision)){
+					return false;
+				}
+				if (aspiration != null && this.moves.series.includes(aspiration)){
+					return false;
+				}
+				// Displacement
+				if (Math.abs(this.index - collision) == Math.abs(this.displacement)){
+					return false;
+				}
+				if (Math.abs(this.index - aspiration) == Math.abs(this.displacement)){
+					return false;
+				}
+				return true;
+			})
+		}
+		else {
+			this.moves.list= this.moves.list.filter((move) => {
+				return !(this.moves.series.includes(move) || Math.abs(this.index - move) == Math.abs(this.displacement));
+			})
+		}
+	}
+	setDisplacement(position) {
+		let x= parseInt(this.index / 9);
+		let y= this.index % 9;
+		let a= parseInt(position /9);
+		let b= position % 9;
+
+		let r;
+		if (x == a) {
+			// Same row
+			return y > b? 1: -1;
+		}
+		if (y == b) {
+			// Same column
+			return x > a? 9: -9;
+		}
+		if (x > a) {
+			return y > b? 10: 8;
+		}
+		else 
+			return y > b? -8: -10;
+
+	}
+
+	addMarks(index, material= markerMat) {
+		function getBoardPosition(index) {
+			let lig= parseInt(index / 9);
+			let col= index % 9;
+
+			return new Vector2(col - 4,  lig - 2);	// x and z respectively in the 3d representation 
+		}
+		let circle= new Mesh(markerGeo, material);
+		let position= getBoardPosition(index);
+		circle.rotation.x= -0.5 * Math.PI;	// Radian rotation
+		circle.position.set(position.x, 0.14, position.y);
+		circle.userData.droppable= true;	// To set the droppable area
+		this.parentBoard.add(circle);
+		this.marks.push(circle);
+	}
+	color() {
+		this.marks= [];
+		if (this.moves.areCaptures) {
+			// Captures goes by pair (collision, aspiration)
+			this.moves.list.forEach(([collision, aspiration]) => {
+				if (collision !== null) {
+					this.addMarks(collision);
+				}
+				if (aspiration !== null) {
+					this.addMarks(aspiration);
+				}
+				
+			});
+		}
+		else {
+			this.moves.list.forEach( move => {
+				this.addMarks(move);
+			});
+		}
+	}
+	clear() {
+		// Opposite to the color method
+		this.marks[0].geometry.dispose();
+		this.marks[0].material.dispose();
+		for (let mark of this.marks)
+			this.parentBoard.remove(mark);
+	}
+	capture(position) {
 		// To capture
-		let displacement= this.index - index;	// 9: vertical, 1: horizontal, 10: left diagonal, 8: right diagonal
-		let pos= index;	// It is the index where we will put the piece
-		console.log(this.index, index);
-		console.log('displacement ' + displacement);
+		this.displacement= this.setDisplacement(position);
+		let direction= this.moves.list.find((couple) => {
+			return couple.includes(position);
+		});
+		let move;
 
-		let move= displacement == 9? up: null;
+		function getMoveMethod(disp) {
+			switch (disp) {
+				case 9:
+					return up;
+				case -9:
+					return down;
+				case 1:
+					return left;
+				case -1:
+					return right;
+				case 8:
+					return upperRight;
+				case -8:
+					return lowerLeft;
+				case 10:
+					return upperLeft;
+				case -10:
+					return lowerRight;
+			}
+		}
 
-		pos= move(pos, 1);
-		while (pos != null) {
-			this.parentBoard.eat(pos);	// Take pieces from the board
-			pos= move(pos, 1);
+		if (direction[0] == direction[1]){
+			prompt()
+		}
+		if (direction[0]) {
+			// To move
+			move= getMoveMethod(this.displacement);	// The same direction
+			let index= move(position, 1);
+			while (index && this.parentBoard.game[index] && this.parentBoard.game[index].value != this.value) {
+				this.parentBoard.removePiece(index);	// Take pieces from the board
+				index= move(index, 1);
+			}
+		}
+		// Aspiration
+		else if (direction[1]) {
+			// To move
+			move= getMoveMethod(-this.displacement);	// The opposite direction
+			let index;
+			index= move(position, 2);
+			while (index && this.parentBoard.game[index] && this.parentBoard.game[index].value != this.value) {
+				this.parentBoard.removePiece(index);	// Take pieces from the board
+				index= move(index, 1);
+			}
 		}
 	}
 }

@@ -3,7 +3,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 let player1Color= document.getElementById('player-1');
 let player2Color= document.getElementById('player-2');
-let turn= 1;
 
 // Colors definitions
 const COLORS= {
@@ -31,6 +30,5 @@ export {
 	camera,
 	control,
 	player1Color,
-	player2Color,
-	turn
+	player2Color
 };

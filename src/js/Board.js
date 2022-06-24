@@ -1,6 +1,6 @@
 // Definition of the Board class
 import { PlaneGeometry, CircleGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, Vector2 } from 'three';
-import { COLORS, turn } from './constants';
+import { COLORS } from './constants';
 import { actualPiece } from './eventHandlers';
 import Piece from './Piece'
 import Laka from '../img/Laka.png';
@@ -32,8 +32,9 @@ class Board extends Mesh {
 		mark.receiveShadow= true;
 		this.receiveShadow= true;
 		this.castShadow= true;
-
 		this.add(mark);
+
+		this.actual;
 	}
 
 	init() {
@@ -64,7 +65,8 @@ class Board extends Mesh {
 				this.game.push(piece);	// The main array store the pieces to be manipulated in the logics
 			}
 		}
-		// console.log(this.game);
+		this.turn= 1;
+		this.turnCount= 0;
 		this.processMoves();
 	}
 	updateColor() {
@@ -79,35 +81,9 @@ class Board extends Mesh {
 			} 
 		}
 	}
-	getBoardPosition(index) {
-		let lig= parseInt(index / 9);
-		let col= index % 9;
-		// console.log(lig, col);
-
-		return new Vector2(col - 4,  lig - 2);	// x and z respectively in the 3d representation 
-	}
 	check() {
 		// Check if it is a valid moving piece
-		return this.movingList.includes(actualPiece);
-	}
-	color() {
-		// Color the valid path of the actual piece
-		this.marks= [];
-		let circleGeo= new CircleGeometry(0.23, 60);
-		let circleMat= new MeshBasicMaterial({color: COLORS.SELECTION})
-		if (actualPiece) {
-			for (let move of actualPiece.moves.list) {
-				console.log(actualPiece.moves);
-				let circle= new Mesh(circleGeo, circleMat);
-				let position= this.getBoardPosition(move);
-				// console.log(position);
-				circle.rotation.x= -0.5 * Math.PI;	// Radian rotation
-				circle.position.set(position.x, 0.14, position.y);
-				circle.userData.droppable= true;	// To set the droppable area
-				this.add(circle);
-				this.marks.push(circle);
-			}
-		}
+		return this.movingList.includes(this.actual);
 	}
 	clear() {
 		// Opposite to the color method
@@ -116,18 +92,16 @@ class Board extends Mesh {
 		for (let mark of this.marks)
 			this.remove(mark);
 	}
-	eat(index) {
-		this.remove(this.game[index]);
-		this.game[index]= 0;	// Free the position
-	}
 	swapTurn() {
 		// Swap turn
-		turn*= -1;
+		this.turn*= -1;
+		this.turnCount ++;
+		this.processMoves();
 	}
 	getTurn() {
 		// Return a list of the pieces having the current turn
 		return this.game.filter((piece) => {
-			return piece && piece.value == turn;
+			return piece && piece.value == this.turn;
 		})
 	}
 	processMoves() {
@@ -149,6 +123,11 @@ class Board extends Mesh {
 			});
 		}
 		this.movingList= movingList;
+	}
+	removePiece(index) {
+		// Remove a piece at a specific index
+		this.remove(this.game[index]);
+		this.game[index]= 0;	// Free the position
 	}
 }
 
