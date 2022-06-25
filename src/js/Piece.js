@@ -124,6 +124,7 @@ const Piece= class Piece extends Mesh {
 			list: [],
 		};	// Informations about the valid moves
 		this.displacement= 0;
+		this.normal= 0;
 	}
 	drag(intersection) {
 		// Drag a piece according to the intersection
@@ -155,6 +156,10 @@ const Piece= class Piece extends Mesh {
 				this.capture(z * 9 + x + 22);	// We pass the index from where we capture which is given by the above formula as z * 9 + x + 22
 				this.captureDone= true;
 			}
+			else {
+				console.log('normal moves');
+				this.normal= 1;	// End turn
+			}
 			// Move it in the game array
 			this.moves.series.push(this.index);	// Save already taken paths
 			this.parentBoard.game[this.index]= 0;
@@ -163,6 +168,7 @@ const Piece= class Piece extends Mesh {
 
 			// Recalculate moves
 			this.processMoves();
+			console.log(this.moves);
 			if (this.moves.list.length && this.parentBoard.turnCount >= 2 && this.normal < 1) {
 				// Continue moving
 				this.select();
@@ -170,8 +176,7 @@ const Piece= class Piece extends Mesh {
 				return false;
 			}
 			else {
-				this.updateColor();
-				this.parentBoard.swapTurn();
+				this.endTurn();
 				return true;
 			}
 		}
@@ -191,6 +196,17 @@ const Piece= class Piece extends Mesh {
 
 		// Correspondances of x and z with col and lig are respectively col - 4 and lig - 2
 		this.position.set(col - 4, 0.19, lig - 2);
+	}
+
+	endTurn() {
+		this.moves= {
+			list: [],
+			series: [],
+			areCaptures: false
+		}
+		this.normal= 0;
+		this.updateColor();
+		this.parentBoard.swapTurn();
 	}
 
 	// Color manipulation
