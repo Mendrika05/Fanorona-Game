@@ -1,18 +1,17 @@
 import { Vector2, Raycaster } from 'three';
-import { renderer, scene, camera, control, COLORS, player1Color, player2Color, turn } from './constants';
+import { renderer, scene, camera, control, COLORS, player1Color, player2Color } from './constants';
 
-let width= window.innerWidth, height= window.innerHeight / 1.2;	// Canvas size
+let width= window.innerWidth/1.2, height= window.innerHeight / 1.01;	// Canvas size
 let rayCaster= new Raycaster();
 let click= new Vector2(), mousemove= new Vector2();
 let turn= -2;	// It is the next opposite direction
-let actualPiece;
 
 // WINDOW EVENT
 const onScreenResize= () => {
 	// Help resize the screen for more responsivity
 	// Screen size
-	width= window.innerWidth;
-	height= window.innerHeight / 1.2;
+	width= window.innerWidth / 1.2;
+	height= window.innerHeight / 1.01;
 
 	renderer.setSize(width, height);
 
@@ -34,18 +33,25 @@ const onClick= (e, board) => {
 
 	// Recolor the old one
 	if (board.actual) {
-		board.actual.material.color.set(board.actual.value == 1? COLORS.GREY: COLORS.WHITE);
-		if (board.actual.drop(found[1])){	// Drop
+		board.actual.updateColor();
+		if (board.actual.drop(found[0])){	// Drop
 			board.actual= undefined;	
 		}// Take focus out
 	}
-	else if (found.length && found[0].object.isPiece && found[0].object.value == board.turn) {
+	if (found.length && found[0].object.isPiece && found[0].object.value == board.turn) {
 		board.actual= found[0].object;	// Set the actual piece
 		if (board.check()) {	// After checking, we see if it is a valid move
 			board.actual.select();	// Color it
+			console.log(board.actual.moves);
 		}
 		else {			board.actual= undefined;
 		}
+	}
+}
+
+const endTurn= (board) => {
+	if (board.actual) {
+		board.actual.endTurn();
 	}
 }
 
@@ -59,20 +65,16 @@ const onMouseMove= (e, board) => {
 	const found= rayCaster.intersectObjects(board.children);
 
 	// Change pointer
-	if (found.length && found[0].object.isPiece) {
-		renderer.domElement.style.cursor= 'pointer';
-	}
-	else {
-		renderer.domElement.style.cursor= 'default';
-	}
-
-	// Drag the selected piece
-	if (board.actual) {
-		if (found.length) {
-			for (let intersection of found) {
-				board.actual.drag(intersection);	// Drag the piece
-			}
+	try {
+		if (found.length && found[0].object.isPiece || found[0].object.userData.droppable) {
+			renderer.domElement.style.cursor= 'pointer';
 		}
+		else {
+			renderer.domElement.style.cursor= 'default';
+		}
+	}
+	catch {
+		return;
 	}
 }
 
@@ -104,7 +106,7 @@ const onTurnChange= () => {
 }
 
 const onResetCamera= (board) => {
-	camera.position.set(0, 5, -board.turn);	// -turn is the current turn
+	camera.position.set(0, 5, 2*board.turn);	// -turn is the current turn
 	camera.updateProjectionMatrix();
 	renderer.render(scene, camera);
 } 
@@ -115,11 +117,13 @@ const onNightModeToggle= (nightMode, ambient) => {
 		// Night mode
 		renderer.setClearColor(COLORS.NIGHT);
 		ambient.color.set(0xaaaaaa);	// Set ambient light
+		document.getElementById('controllers').style.backgroundColor= "#0B0848";
 	}
 	else {
 		// Day mode
 		renderer.setClearColor(COLORS.DAY);
 		ambient.color.set(0xffffff);	// Set ambient light
+		document.getElementById('controllers').style.backgroundColor= "#0F5CD6";
 	}
 }
 
@@ -133,6 +137,7 @@ const changeColorPlayer2= () => {
 
 export {
 	onClick,
+	endTurn,
 	onScreenResize,
 	onTurnChange,
 	onResetCamera,

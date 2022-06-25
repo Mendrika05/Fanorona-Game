@@ -1,7 +1,7 @@
 // Definition of the Board class
 import { PlaneGeometry, CircleGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, Vector2 } from 'three';
 import { COLORS } from './constants';
-import { actualPiece } from './eventHandlers';
+import { onTurnChange } from './eventHandlers';
 import Piece from './Piece'
 import Laka from '../img/Laka.png';
 
@@ -70,15 +70,10 @@ class Board extends Mesh {
 		this.processMoves();
 	}
 	updateColor() {
-		let changing= -1;	// The material to change first
 		for (let piece of this.game) {
-			if (piece && piece.value == changing ) {
+			if (piece) {
 				piece.updateColor();
-				if (changing == -1)	// Change the material to change
-					changing= 1;
-				else
-					break;	// done changing material
-			} 
+			}
 		}
 	}
 	check() {
@@ -87,16 +82,32 @@ class Board extends Mesh {
 	}
 	clear() {
 		// Opposite to the color method
-		this.marks[0].geometry.dispose();
-		this.marks[0].material.dispose();
-		for (let mark of this.marks)
-			this.remove(mark);
+		if (this.marks.length){
+			this.marks[0].geometry.dispose();
+			this.marks[0].material.dispose();
+			for (let mark of this.marks)
+				this.remove(mark);
+		}
+	}
+	lock() {
+		this.movingList= this.movingList.filter(piece => {
+			if (piece != this.actual) {
+				piece.selectable= false;
+				piece.updateColor();
+				return false;
+			}
+			return true;
+		})
 	}
 	swapTurn() {
 		// Swap turn
+		this.actual.selectable= false;
+		this.actual.updateColor();
 		this.turn*= -1;
 		this.turnCount ++;
 		this.processMoves();
+		document.getElementById('end-turn').style.display= 'none';	// Hide end turn button
+		onTurnChange();
 	}
 	getTurn() {
 		// Return a list of the pieces having the current turn
@@ -123,11 +134,30 @@ class Board extends Mesh {
 			});
 		}
 		this.movingList= movingList;
+		this.movingList.forEach(piece => {
+			piece.setSelectable();
+		});
 	}
 	removePiece(index) {
 		// Remove a piece at a specific index
 		this.remove(this.game[index]);
 		this.game[index]= 0;	// Free the position
+	}
+	checkForWin() {
+		let count= 0;
+		for (let i= 0; i < this.game.length; i++) {
+			if (this.game[i] && this.game[i].value != this.actual.value) {
+				count++;
+			}
+			if (count > 1) {
+				break;
+			}
+		}
+
+		// If only one piece left
+		if (count <= 1) {
+			alert(this.actual.value == 1? 'PLAYER 1 WON THE GAME': 'PLAYER 2 WON THE GAME');
+		}
 	}
 }
 

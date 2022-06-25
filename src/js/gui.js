@@ -2,7 +2,7 @@
 import { Fog, PlaneGeometry, DoubleSide, BoxGeometry, MeshStandardMaterial, Mesh, TextureLoader, LinearFilter, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import { renderer, scene, camera,  control, COLORS, player1Color, player2Color } from './constants';	// Import the basic utilities
-import { onClick, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
+import { onClick, endTurn, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
 import Board from './Board';
 
 const board= new Board();
@@ -18,7 +18,7 @@ const init= () => {
 	// Initialization of the GUI
 
 	// Renderer setup
-	renderer.setSize(window.innerWidth, window.innerHeight / 1.2);	// Size
+	renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.01);	// Size
 	renderer.setClearColor(COLORS.DAY);	// Renderer background
 	renderer.shadowMap.enabled= true;	// Enable shadows
 
@@ -29,8 +29,8 @@ const init= () => {
 	camera.position.set(0, 5, 2);
 
 	// Orbit Controls
-	// control.enabled= !lockCamera;
-	// control.enableZoom= false;	// No zooming
+	control.enabled= false;
+	control.enableZoom= false;	// No zooming
 
 	// The TABLE
 	/************************************************************************************************************************/
@@ -76,10 +76,14 @@ const init= () => {
 	const canvas= renderer.domElement;	// The canvas
 	const nightChk= document.getElementById('night-chk');	// The night mode checkbox
 	canvas.addEventListener('click', (event) => onClick(event, board));
+	// canvas.addEventListener('dblclick', (event) => onDblClick(event, board));
+	document.getElementById('end-turn').addEventListener('click', (event) => endTurn(board));
 	canvas.addEventListener('mousemove', (event) => onMouseMove(event, board));
 	
-	// document.getElementById('change-view').addEventListener('click', onTurnChange);
-	// document.getElementById('reset-camera').addEventListener('click', onResetCamera);
+	// document.getElementById('end-turn').addEventListener('click', endTurn(board));
+	// document.getElementById('reset-camera').addEventListener('click', () => {
+	// 	onResetCamera(board);
+	// });
 	nightChk.addEventListener('change', () => {
 		onNightModeToggle(nightChk.checked, ambient);
 	});
@@ -88,6 +92,7 @@ const init= () => {
 	player1Color.addEventListener('change', () => {
 		changeColorPlayer1();
 		board.updateColor();
+		console.log('Player 1');
 	});
 	player2Color.addEventListener('change', () => {
 		changeColorPlayer2();

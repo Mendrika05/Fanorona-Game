@@ -1,24 +1,14 @@
 // Definition of the Piece class
-import { CylinderGeometry, MeshStandardMaterial, MeshBasicMaterial, CircleGeometry, Vector2, Mesh } from 'three';
+import { CylinderGeometry, MeshStandardMaterial, MeshPhongMaterial, CircleGeometry, Vector2, Mesh } from 'three';
 import { COLORS } from './constants';
 
 const pieceGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 60);
 const pieceMaterial1= new MeshStandardMaterial({color: COLORS.PLAYER1});
 const pieceMaterial2= new MeshStandardMaterial({color: COLORS.PLAYER2});
-const markerGeo= new CircleGeometry(0.25, 60);
-const markerMat= new MeshBasicMaterial({color: COLORS.SELECTION});
+const selectableMat= new MeshStandardMaterial({color: COLORS.SELECTABLE});
+const markerGeo= new CylinderGeometry(0.25, 0.25, 0.1, 10);
+const markerMat= new MeshStandardMaterial({color: COLORS.SELECTION, transparent: true, opacity: 0.2});
 
-// We consider from bottom to top for diagonals
-// function toCoord(index) {
-// 	return [parseInt(index / 9), index % 9]
-// }
-
-// function toIndex(position) {
-// 	// Return null if we tresspassed to board
-// 	if (position[0] == 0 || position[0] == 6 || position[1] == 0 || position[1] == 10)	// Border of the board
-// 		return null;
-// 	return 9 * position[0] + position[1];
-// }
 // MOVES
 function up(index, step= 1) {
 	if (index == null)
@@ -124,13 +114,16 @@ const Piece= class Piece extends Mesh {
 			list: [],
 		};	// Informations about the valid moves
 		this.displacement= 0;
-		this.normal= 0;
+		this.step= 0;
+		this.next;	// The next element
+		// this.hasMoved= false;	// To track moves
 	}
 	drag(intersection) {
 		// Drag a piece according to the intersection
 		if (intersection.object.userData.isBoard) {	// If we are on the board
 			// Set the piece position
-			this.position.set(intersection.point.x, 0.3, intersection.point.z);
+			this.position.x= intersection.point.x;
+			this.position.z= intersection.point.z;
 		}
 	}
 	drop(intersection) {
@@ -151,26 +144,29 @@ const Piece= class Piece extends Mesh {
 			let x= intersection.object.position.x;
 			let z= intersection.object.position.z;
 			this.clear();
-			this.position.set(x, 0.19, z);
+			this.parentBoard.lock();
+			this.setDisplacement(z * 9 + x + 22);	// Setting the displacement
+			
 			if (this.moves.areCaptures) {
 				this.capture(z * 9 + x + 22);	// We pass the index from where we capture which is given by the above formula as z * 9 + x + 22
-				this.captureDone= true;
-			}
-			else {
-				console.log('normal moves');
-				this.normal= 1;	// End turn
+				this.parentBoard.checkForWin();
 			}
 			// Move it in the game array
 			this.moves.series.push(this.index);	// Save already taken paths
 			this.parentBoard.game[this.index]= 0;
+			this.next= [x, z];	// The next position
+			this.position.set(x, 0.19, z);
 			this.index=	z * 9 + x + 22; // Set new index
 			this.parentBoard.game[this.index]= this;
-
+			
+			if (document.getElementById('end-turn').style.display == 'none') {
+				// Place the end turn button
+				document.getElementById('end-turn').style.display = 'block';
+			}
 			// Recalculate moves
 			this.processMoves();
-			console.log(this.moves);
-			if (this.moves.list.length && this.parentBoard.turnCount >= 2 && this.normal < 1) {
-				// Continue moving
+			if (this.moves.list.length && this.moves.areCaptures) {
+				// Continue moving captures
 				this.select();
 				this.resetPosition();
 				return false;
@@ -188,7 +184,10 @@ const Piece= class Piece extends Mesh {
 			return true;
 		}
 	}
-
+	setSelectable() {
+		this.selectable= true;
+		this.material= selectableMat;
+	}
 	resetPosition() {
 		// Reset the position in case of a bad drop
 		let lig= parseInt(this.index / 9);
@@ -204,8 +203,10 @@ const Piece= class Piece extends Mesh {
 			series: [],
 			areCaptures: false
 		}
+		this.clear();
 		this.normal= 0;
 		this.updateColor();
+		this.hasMoved= false;
 		this.parentBoard.swapTurn();
 	}
 
@@ -218,7 +219,12 @@ const Piece= class Piece extends Mesh {
 	}
 	updateColor() {
 		// Update the color
-		this.material.color.set(this.value == 1? COLORS.PLAYER1: COLORS.PLAYER2); 
+		pieceMaterial1.color.set(COLORS.PLAYER1);
+		pieceMaterial2.color.set(COLORS.PLAYER2);
+		if (!this.selectable)
+			this.material= this.value == 1? pieceMaterial1: pieceMaterial2; 
+		else
+			this.material= selectableMat;
 	}
 	processMoves() {
 		let positions= mover.cross(this.index);	// For positions around
@@ -251,7 +257,7 @@ const Piece= class Piece extends Mesh {
 					if (i % 2 == 0) {
 						// We have opposite direction going by sequencial pairs
 						let aspiration= positions[i+1];
-						if (aspiration !== null && this.parentBoard.game[aspiration].isPiece && this.parentBoard.game[aspiration].value != this.value) {
+						if (aspiration !== null && this.parentBoard.game[aspiration] && this.parentBoard.game[aspiration].value != this.value) {
 							// If not outside the board and there piece is a capturable piece opposed to us
 							capt.push(positions[i]);	// THIS IS A CAPTURE BY COLLISION
 						}
@@ -290,10 +296,10 @@ const Piece= class Piece extends Mesh {
 					return false;
 				}
 				// Displacement
-				if (Math.abs(this.index - collision) == Math.abs(this.displacement)){
+				if (Math.abs(collision - this.index) == Math.abs(this.displacement)){
 					return false;
 				}
-				if (Math.abs(this.index - aspiration) == Math.abs(this.displacement)){
+				if (Math.abs(aspiration - this.index) == Math.abs(this.displacement)){
 					return false;
 				}
 				return true;
@@ -301,7 +307,7 @@ const Piece= class Piece extends Mesh {
 		}
 		else {
 			this.moves.list= this.moves.list.filter((move) => {
-				return !(this.moves.series.includes(move) || Math.abs(this.index - move) == Math.abs(this.displacement));
+				return !(this.moves.series.includes(move) || Math.abs(move - this.index) == Math.abs(this.displacement));
 			})
 		}
 	}
@@ -314,17 +320,17 @@ const Piece= class Piece extends Mesh {
 		let r;
 		if (x == a) {
 			// Same row
-			return y > b? 1: -1;
+			this.displacement= y > b? -1: 1;
 		}
-		if (y == b) {
+		else if (y == b) {
 			// Same column
-			return x > a? 9: -9;
+			this.displacement= x > a? -9: 9;
 		}
-		if (x > a) {
-			return y > b? 10: 8;
+		else if (x > a) {
+			this.displacement= y > b? -10: -8;
 		}
 		else 
-			return y > b? -8: -10;
+			this.displacement= y > b? 8: 10;
 
 	}
 
@@ -337,8 +343,8 @@ const Piece= class Piece extends Mesh {
 		}
 		let circle= new Mesh(markerGeo, material);
 		let position= getBoardPosition(index);
-		circle.rotation.x= -0.5 * Math.PI;	// Radian rotation
-		circle.position.set(position.x, 0.14, position.y);
+		// circle.rotation.x= -0.5 * Math.PI;	// Radian rotation
+		circle.position.set(position.x, 0.2, position.y);
 		circle.userData.droppable= true;	// To set the droppable area
 		this.parentBoard.add(circle);
 		this.marks.push(circle);
@@ -365,46 +371,55 @@ const Piece= class Piece extends Mesh {
 	}
 	clear() {
 		// Opposite to the color method
-		this.marks[0].geometry.dispose();
-		this.marks[0].material.dispose();
-		for (let mark of this.marks)
-			this.parentBoard.remove(mark);
+		if (this.marks.length) {
+			this.marks[0].geometry.dispose();
+			this.marks[0].material.dispose();
+			for (let mark of this.marks) {
+				this.parentBoard.remove(mark);
+			}
+		}
+	}
+	getMoveMethod(disp) {
+		switch (disp) {
+			case -9:
+				return up;
+			case 9:
+				return down;
+			case -1:
+				return left;
+			case 1:
+				return right;
+			case -8:
+				return upperRight;
+			case 8:
+				return lowerLeft;
+			case -10:
+				return upperLeft;
+			case +10:
+				return lowerRight;
+		}
 	}
 	capture(position) {
 		// To capture
-		this.displacement= this.setDisplacement(position);
 		let direction= this.moves.list.find((couple) => {
 			return couple.includes(position);
 		});
 		let move;
 
-		function getMoveMethod(disp) {
-			switch (disp) {
-				case 9:
-					return up;
-				case -9:
-					return down;
-				case 1:
-					return left;
-				case -1:
-					return right;
-				case 8:
-					return upperRight;
-				case -8:
-					return lowerLeft;
-				case 10:
-					return upperLeft;
-				case -10:
-					return lowerRight;
-			}
-		}
+		if (direction[0] == direction[1]) {
+			// Choose between the 2
+			let choice= prompt('0/ Collision\n1/ Aspiration\n(Default: Collision)');
 
-		if (direction[0] == direction[1]){
-			prompt()
+			if (choice == undefined || choice == 0) {
+				direction[1]= null;	// Collision
+			}
+			else {
+				direction[0]= null;	// Aspiration
+			}
 		}
 		if (direction[0]) {
 			// To move
-			move= getMoveMethod(this.displacement);	// The same direction
+			move= this.getMoveMethod(this.displacement);	// The same direction
 			let index= move(position, 1);
 			while (index && this.parentBoard.game[index] && this.parentBoard.game[index].value != this.value) {
 				this.parentBoard.removePiece(index);	// Take pieces from the board
@@ -414,7 +429,7 @@ const Piece= class Piece extends Mesh {
 		// Aspiration
 		else if (direction[1]) {
 			// To move
-			move= getMoveMethod(-this.displacement);	// The opposite direction
+			move= this.getMoveMethod(-this.displacement);	// The opposite direction
 			let index;
 			index= move(position, 2);
 			while (index && this.parentBoard.game[index] && this.parentBoard.game[index].value != this.value) {

@@ -5,33 +5,113 @@
 	<meta name="viewport" content="width=device-width, user-scalable= no">
 	<title>Fanorona - "The Malagasy boardgame"</title>
 	<style type="text/css">
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
 		body {
+			position: absolute;
+			height: 100%;
+			width: 100%;
 			user-select: none;
 			margin: 0;
+			padding: 0;
 		}
-		/*canvas {
+		canvas {
 			cursor: grab;
+			padding: 0;
+			margin: 0;
 		}
 		canvas:active {
 			cursor: grabbing;
-		}*/
-		button, input[type= "checkbox"], label {
+		}
+		button, input, label {
 			cursor: pointer;
-			margin: 5px;
+			margin: 10px 0;
+		}
+		#container {
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			margin: 0;
+			padding: 0;
+			background: #0F5CD6;
+		}
+		#controllers {
+			padding-left: 10px;
+			width: 25%;
+			border-left: 2px solid black;
+			font-weight: bold;
+			font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+			font-size: 1.75vw;
+		}
+		#night-chk {
+			padding: 0;
+			margin: 0;
+			height: 15px;
+			width: 15px;
+		}
+		#chk {
+			display: block;
+			height: 50px;
+			background: red;
+		}
+		#end-turn {
+			display: none;
+		}
+		#selector {
+			display: none;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.9);
+		}
+		button {
+			background: rgba(0,0,0,0);
+			border-radius: 10px;
+			width: 100px;
+			height: 50px;
+			font-size: 1em;
+			font-weight: 900;
+		}
+		button:hover {
+			font-size: 1.02em;
 		}
 	</style>
 	<!-- <script type="text/javascript" src= "node_modules/three/build/three.js"></script> -->
 	<!-- <script type="text/javascript" src= "node_modules/three/examples/js/controls/OrbitControls.js"></script> -->
 </head>
 <body>
-	<canvas id= "canvas"></canvas>
-	<div id= "controllers">
-		<!-- <button id= "change-view">Change turn</button> -->
-		<!-- <button id= "reset-camera">Reset Cameras</button> -->
-		<label for= "night-chk">Night Mode</label><input type= "checkbox" id= "night-chk" /><br />
-		<label>Player 1: </label><input type= "color" id= "player-1" /><br />
-		<label>Player 2: </label><input type= "color" id= "player-2" />
+	<table id= "container" cellspacing= 0 cellpadding= 0>
+		<tr>
+			<td>
+				<canvas id= "canvas"></canvas>
+			</td>
+			<td id= "controllers">
+				<!-- <button id= "change-view">Change turn</button> -->
+				<input type= "checkbox" id= "night-chk" />
+				<label for= "night-chk"> Night Mode</label><br />
+				<label for= "player-1">Player 1: </label><input type= "color" id= "player-1" /><br />
+				<label for= "player-2">Player 2: </label><input type= "color" id= "player-2" /><br />
+				<!-- <button id= "reset-camera">Reset Cameras</button> -->
+				<button id= "end-turn">End turn</button>
+				<!-- <button id= "change-view">Change turn</button> -->
+			</td>
+		</tr>
+	</table>
+	<div id= "selector">
+		<button id= "aspire">ASPIRE</button>
+		<button id= "collide">COLLIDE</button>
 	</div>
+	
+	<!-- <div id= "controllers">
+		<button id= "change-view">Change turn</button> -->
+		<!-- <button id= "reset-camera">Reset Cameras</button> -->
+		<!-- <label for= "night-chk">Night Mode</label><input type= "checkbox" id= "night-chk" /><br />
+		<label>Player 1: </label><input type= "color" id= "player-1" /><br />
+		<label>Player 2: </label><input type= "color" id= "player-2" /> -->
+	<!-- </div> -->
 
 	<!-- The graph script -->
 	<script type= "module" src= "./js/gui.js"></script>
