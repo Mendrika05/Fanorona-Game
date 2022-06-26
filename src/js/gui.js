@@ -2,7 +2,7 @@
 import { Fog, PlaneGeometry, DoubleSide, BoxGeometry, MeshStandardMaterial, Mesh, TextureLoader, LinearFilter, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import { renderer, scene, camera,  control, COLORS, player1Color, player2Color } from './constants';	// Import the basic utilities
-import { onClick, endTurn, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
+import { onClick, endTurn, onScreenResize, newPlay, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
 import Board from './Board';
 
 const board= new Board();
@@ -29,22 +29,9 @@ const init= () => {
 	camera.position.set(0, 5, 2);
 
 	// Orbit Controls
-	control.enabled= false;
-	control.enableZoom= false;	// No zooming
+	// control.enabled= false;
+	// control.enableZoom= false;	// No zooming
 
-	// The TABLE
-	/************************************************************************************************************************/
-	const plane= new Mesh(
-			new PlaneGeometry(15, 8),
-			new MeshStandardMaterial({
-				color: 0x3F1A0B,
-				side: DoubleSide
-			})
-		);
-	scene.add(plane);
-
-	plane.rotation.x= 0.5 * Math.PI;
-	plane.receiveShadow= true;
 	/**************************************************************************************************************************/
 
 	// THE BOARDS
@@ -75,9 +62,10 @@ const init= () => {
 	player2Color.value= "#ffffff";
 	const canvas= renderer.domElement;	// The canvas
 	const nightChk= document.getElementById('night-chk');	// The night mode checkbox
-	canvas.addEventListener('click', (event) => onClick(event, board));
+	canvas.addEventListener('click', (event) => onClick(event, board, control));
 	// canvas.addEventListener('dblclick', (event) => onDblClick(event, board));
 	document.getElementById('end-turn').addEventListener('click', (event) => endTurn(board));
+	document.getElementById('new-play').addEventListener('click', () => newPlay(board, control));
 	canvas.addEventListener('mousemove', (event) => onMouseMove(event, board));
 	
 	// document.getElementById('end-turn').addEventListener('click', endTurn(board));

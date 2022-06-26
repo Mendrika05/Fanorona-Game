@@ -22,7 +22,7 @@ const onScreenResize= () => {
 }
 
 // BOARD EVENTS
-const onClick= (e, board) => {
+const onClick= (e, board, controllers) => {
 	// When a piece is clicked
 	click.x= (e.clientX / width) * 2 - 1;
 	click.y= - (e.clientY / height) * 2 + 1;
@@ -32,26 +32,29 @@ const onClick= (e, board) => {
 	const found= rayCaster.intersectObjects(board.children);
 
 	// Recolor the old one
-	if (board.actual) {
-		board.actual.updateColor();
-		if (board.actual.drop(found[0])){	// Drop
-			board.actual= undefined;	
-		}// Take focus out
-	}
-	if (found.length && found[0].object.isPiece && found[0].object.value == board.turn) {
-		board.actual= found[0].object;	// Set the actual piece
-		if (board.check()) {	// After checking, we see if it is a valid move
-			board.actual.select();	// Color it
-			console.log(board.actual.moves);
+	if (board.noWinner) {
+		if (board.actual) {
+			board.actual.updateColor();
+			if (board.actual.drop(found[0])){	// Drop
+				board.actual= undefined;	
+			}// Take focus out
 		}
-		else {			board.actual= undefined;
+		if (found.length && found[0].object.isPiece && found[0].object.value == board.turn) {
+			board.actual= found[0].object;	// Set the actual piece
+			if (board.check()) {	// After checking, we see if it is a valid move
+				board.actual.select();	// Color it
+				// console.log(board.actual.moves);
+			}
+			else {
+				board.actual= undefined;
+			}
 		}
 	}
-}
-
-const endTurn= (board) => {
-	if (board.actual) {
-		board.actual.endTurn();
+	else {
+		// End play
+		controllers.enabled= true;
+		document.getElementById('new-play').style.display= 'block';
+		document.getElementById('end-turn').style.display= 'none';
 	}
 }
 
@@ -127,6 +130,20 @@ const onNightModeToggle= (nightMode, ambient) => {
 	}
 }
 
+/* GAME MANAGEMENT */
+const newPlay= (board, controllers) => {
+	board.newPlay();
+	onResetCamera(board);
+	controllers.enabled= false;
+	document.getElementById('new-play').style.display= 'none';
+}
+
+const endTurn= (board) => {
+	if (board.actual) {
+		board.actual.endTurn();
+	}
+}
+
 const changeColorPlayer1= () => {
 	COLORS.PLAYER1= player1Color.value;
 }
@@ -145,5 +162,6 @@ export {
 	onNightModeToggle,
 	changeColorPlayer1,
 	changeColorPlayer2,
-	actualPiece
+	actualPiece,
+	newPlay
 }

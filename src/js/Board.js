@@ -1,5 +1,5 @@
 // Definition of the Board class
-import { PlaneGeometry, CircleGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, Vector2 } from 'three';
+import { PlaneGeometry, CircleGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, Vector2, DoubleSide } from 'three';
 import { COLORS } from './constants';
 import { onTurnChange } from './eventHandlers';
 import Piece from './Piece'
@@ -34,9 +34,21 @@ class Board extends Mesh {
 		this.castShadow= true;
 		this.add(mark);
 
-		this.actual;
-	}
+		// The TABLE
+		/************************************************************************************************************************/
+		const plane= new Mesh(
+				new PlaneGeometry(15, 8),
+				new MeshStandardMaterial({
+					color: 0x3F1A0B,
+					side: DoubleSide
+				})
+			);
+		this.add(plane);
 
+		plane.rotation.x= 0.5 * Math.PI;
+		plane.receiveShadow= true;
+	}
+	/*************************************************************** INITIALISATION ********************************************************************************************/
 	init() {
 		// Placing pieces on the board
 		let piece;
@@ -65,10 +77,36 @@ class Board extends Mesh {
 				this.game.push(piece);	// The main array store the pieces to be manipulated in the logics
 			}
 		}
+		this.noWinner= true;
+		this.inRotation= true;
+		this.rotate();
+	}
+
+	newPlay() {
+		this.rotation.y= 0;
+		this.inRotation= false;
+		// Init turn
 		this.turn= 1;
+		this.getTurn().forEach(piece => {
+			piece.selectable= false;
+			piece.updateColor();
+		});	// Set transparent color for new turn
 		this.turnCount= 0;
+		this.actual;
 		this.processMoves();
 	}
+
+	rotate() {
+		// board rotation
+		if (this.inRotation) {
+			requestAnimationFrame(this.rotate.bind(this));
+			this.rotation.y+= 0.001;
+		}
+		// this.rotation.z+= 0.1;
+	}
+	/********************************************************************************************************************************************************************/
+	
+	/* GAME MANAGEMENT */
 	updateColor() {
 		for (let piece of this.game) {
 			if (piece) {
@@ -81,7 +119,7 @@ class Board extends Mesh {
 		return this.movingList.includes(this.actual);
 	}
 	clear() {
-		// Opposite to the color method
+		// Clear board valid moves marks
 		if (this.marks.length){
 			this.marks[0].geometry.dispose();
 			this.marks[0].material.dispose();
@@ -90,6 +128,7 @@ class Board extends Mesh {
 		}
 	}
 	lock() {
+		// Lock the actual piece as the only one movable
 		this.movingList= this.movingList.filter(piece => {
 			if (piece != this.actual) {
 				piece.selectable= false;
@@ -101,9 +140,15 @@ class Board extends Mesh {
 	}
 	swapTurn() {
 		// Swap turn
-		this.actual.selectable= false;
-		this.actual.updateColor();
+		this.getTurn().forEach(piece => {
+			piece.selectable= true;
+			piece.updateColor();
+		});	// Set solid colr for them
 		this.turn*= -1;
+		this.getTurn().forEach(piece => {
+			piece.selectable= false;
+			piece.updateColor();
+		});	// Set transparent color for new turn
 		this.turnCount ++;
 		this.processMoves();
 		document.getElementById('end-turn').style.display= 'none';	// Hide end turn button
@@ -144,19 +189,31 @@ class Board extends Mesh {
 		this.game[index]= 0;	// Free the position
 	}
 	checkForWin() {
+		// Check for the winner
 		let count= 0;
 		for (let i= 0; i < this.game.length; i++) {
 			if (this.game[i] && this.game[i].value != this.actual.value) {
 				count++;
 			}
 			if (count > 1) {
-				break;
+				this.noWinner= true;
+				return false;
 			}
 		}
 
 		// If only one piece left
 		if (count <= 1) {
+			// End play
 			alert(this.actual.value == 1? 'PLAYER 1 WON THE GAME': 'PLAYER 2 WON THE GAME');
+			this.actual.selectable= false;
+			this.actual.updateColor();
+			this.noWinner= false;
+			this.actual= undefined;
+			this.turn= 0;
+			// Rotate it
+			this.inRotation= true;
+			this.rotate();
+			return true;	// End the game
 		}
 	}
 }
