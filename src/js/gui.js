@@ -2,7 +2,7 @@
 import { Fog, PlaneGeometry, DoubleSide, BoxGeometry, MeshStandardMaterial, Mesh, TextureLoader, LinearFilter, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import { renderer, scene, camera,  control, COLORS, player1Color, player2Color } from './constants';	// Import the basic utilities
-import { onClick, onScreenResize, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
+import { onClick, endTurn, onScreenResize, newPlay, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
 import Board from './Board';
 
 const board= new Board();
@@ -18,7 +18,7 @@ const init= () => {
 	// Initialization of the GUI
 
 	// Renderer setup
-	renderer.setSize(window.innerWidth, window.innerHeight / 1.2);	// Size
+	renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.01);	// Size
 	renderer.setClearColor(COLORS.DAY);	// Renderer background
 	renderer.shadowMap.enabled= true;	// Enable shadows
 
@@ -29,22 +29,9 @@ const init= () => {
 	camera.position.set(0, 5, 2);
 
 	// Orbit Controls
-	// control.enabled= !lockCamera;
+	// control.enabled= false;
 	// control.enableZoom= false;	// No zooming
 
-	// The TABLE
-	/************************************************************************************************************************/
-	const plane= new Mesh(
-			new PlaneGeometry(15, 8),
-			new MeshStandardMaterial({
-				color: 0x3F1A0B,
-				side: DoubleSide
-			})
-		);
-	scene.add(plane);
-
-	plane.rotation.x= 0.5 * Math.PI;
-	plane.receiveShadow= true;
 	/**************************************************************************************************************************/
 
 	// THE BOARDS
@@ -75,11 +62,16 @@ const init= () => {
 	player2Color.value= "#ffffff";
 	const canvas= renderer.domElement;	// The canvas
 	const nightChk= document.getElementById('night-chk');	// The night mode checkbox
-	canvas.addEventListener('click', (event) => onClick(event, board));
+	canvas.addEventListener('click', (event) => onClick(event, board, control));
+	// canvas.addEventListener('dblclick', (event) => onDblClick(event, board));
+	document.getElementById('end-turn').addEventListener('click', (event) => endTurn(board));
+	document.getElementById('new-play').addEventListener('click', () => newPlay(board, control));
 	canvas.addEventListener('mousemove', (event) => onMouseMove(event, board));
 	
-	// document.getElementById('change-view').addEventListener('click', onTurnChange);
-	// document.getElementById('reset-camera').addEventListener('click', onResetCamera);
+	// document.getElementById('end-turn').addEventListener('click', endTurn(board));
+	// document.getElementById('reset-camera').addEventListener('click', () => {
+	// 	onResetCamera(board);
+	// });
 	nightChk.addEventListener('change', () => {
 		onNightModeToggle(nightChk.checked, ambient);
 	});
@@ -88,6 +80,7 @@ const init= () => {
 	player1Color.addEventListener('change', () => {
 		changeColorPlayer1();
 		board.updateColor();
+		console.log('Player 1');
 	});
 	player2Color.addEventListener('change', () => {
 		changeColorPlayer2();

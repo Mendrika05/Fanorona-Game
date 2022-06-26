@@ -9,6 +9,7 @@ const COLORS= {
 		PLAYER1: 0x333333,
 		PLAYER2: 0xffffff,
 		SELECTION: 0xE4D814,
+		SELECTABLE: 0xE0CF3F,
 		BOARD: 0x83390D,
 		NIGHT: 0x0B0848,
 		DAY: 0xF5CD6
@@ -19,7 +20,7 @@ const renderer= new WebGLRenderer({
 	canvas: document.getElementById('canvas'),
 });	// Renderer
 const scene= new Scene();	// Scene
-const camera= new PerspectiveCamera(75, window.innerWidth / (window.innerHeight / 1.2), 0.5, 100);	// Camera
+const camera= new PerspectiveCamera(75, (window.innerWidth / 1.2) / (window.innerHeight / 1.01), 0.5, 100);	// Camera
 
 const control= new OrbitControls(camera, renderer.domElement);	// The controls
 
