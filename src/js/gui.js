@@ -3,7 +3,7 @@ import { Fog, PlaneGeometry, DoubleSide, BoxGeometry, MeshStandardMaterial, Mesh
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import { renderer, scene, camera,  control, COLORS, player1Color, player2Color } from './constants';	// Import the basic utilities
 import { onClick, endTurn, onScreenResize, newPlay, onTurnChange, onResetCamera, onMouseMove, onNightModeToggle, changeColorPlayer1, changeColorPlayer2 } from './eventHandlers';
-import Board from './Board';
+import Board from './Board2';
 
 const board= new Board();
 
