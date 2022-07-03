@@ -23,33 +23,33 @@ export default class Piece extends Mesh {
 		this.isPiece= true;	// To say that it is a piece
 		this.index= index;	// The position in the current array
 		this.value= value;	// 1 means grey, -1 means white
+		this.movable= false;	// If it is selectable then we can drag it
 		this.castShadow= true;	// Shadow
 		this.moves= undefined;	// To track moves
 		this.displacement= 0;	// Displacement is either up/down (-9, 9), left/right (-1, +1) or one of the diagonals
 	}	// End of constructor
 
 	/**************************** USER INTERFACE CHANGES *********************************/
+	default() {
+		// Set default value
+		this.movable= false;
+		this.moves= undefined;
+		this.displacement= 0;
+		this.material= this.value == 1? pieceMaterial1: pieceMaterial2;
+	}
 	select() {
 		// When the piece is selected
 		this.material= selectedMaterial1;
-		this.plotMoves();
 	}
 	setAsMovable() {
 		// Change material to the movable material
+		this.movable= true;
 		this.material= selectableMaterial1;
 	}
-	deselect() {
-		// Reset material color
-		this.material= this.value == 1? pieceMaterial1: pieceMaterial2;
-	}
-	plotMoves() {
-		// Plot valid moves
-		for (let move in this.moves) {
-			for (let point of this.moves[move]) {
-				// Plot valid moves on the board aka this.parent
-				this.parent.plot(point);	// Add the plot to the board
-			}
-		}
+	drop(canDropHere) {
+		// Drop the piece on the object emplacement
+		this.position.set(canDropHere.position.x, 0.19, canDropHere.position.z);
+		this.default();	// Reset color
 	}
 	/********************************* PIECE LOGICS **************************************************/
 	setDisplacement(index) {
