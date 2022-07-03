@@ -127,7 +127,7 @@ export default class Game {
 		// Reset the colors of the pieces
 		if (this.movablePieces.length > 0) {
 			this.movablePieces.forEach((piece) => {
-				piece.deselect();
+				piece.default();
 			});
 		}
 		if (!this.winnerExists()) {
@@ -233,9 +233,16 @@ export default class Game {
 			piece.setAsMovable();	// To implement
 		});
 	}
-	/* ACTUAL PIECE setter */
+	/******************************************************* ACTUAL PIECE setter ******************************************/
 	set setActual(piece) {
 		// Set the actual properties
 		this.actual= piece;
+
+		// Plot the moves of the actual piece on the board
+		for (let move in piece.moves) {
+			for (let point of piece.moves[move]) {
+				this.board.plot(point);	// Add the plot to the board
+			}
+		}
 	}
 }
