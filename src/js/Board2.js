@@ -3,7 +3,7 @@ import { PlaneGeometry, BoxGeometry, CylinderGeometry, MeshStandardMaterial, Tex
 import { COLORS } from './constants';
 import Laka from '../img/Laka.png';
 
-const plotGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 10);
+const plotGeometry= new CylinderGeometry(0.25, 0.25, 0.1, 10);	// Top perimeter, bottom perimeter, height
 const plotMaterial= new MeshStandardMaterial({
 	color: COLORS.SELECTION,
 	wireframe: true,
@@ -91,5 +91,6 @@ export default class Board extends Mesh {
 		let x= index % 9 - 4;
 		let y= parseInt(index / 9) - 2;
 		mark.position.set(x, 0.19, y);
+		mark.userData.canDropHere= true;	// Set it so that the piece can move on it
 	}
 }
