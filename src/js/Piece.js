@@ -141,7 +141,6 @@ const Piece= class Piece extends Mesh {
 		}
 		else 
 			this.displacement= y > b? 8: 10;
-
 	}
 	getMoveMethod(disp) {
 		switch (disp) {
