@@ -24,12 +24,12 @@ const onBoardClick= (event, game) => {
 
 	if (inters.length) {	// If it intersected something
 		let obj= inters[0].object;	// Get the intersected object
-		if (game.actual == undefined && obj.isPiece && obj.value == game.turn) {	// Selection
+		if (game.actual == undefined && obj.isPiece && obj.movable) {	// Selection
 			// Obj is a piece
 			game.setActual= obj;
 			obj.select();	// UI
 		}
-		else if (inters[0].object.droppable) {	// Piece drop
+		else if (inters[0].object.userData.canDropHere) {	// Piece drop
 			game.actual.drop(inters[0].object);	// Pass the object to allow the dropping on the exact point
 		}
 	}
