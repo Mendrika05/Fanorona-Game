@@ -33,6 +33,14 @@ export default class Piece extends Mesh {
 		// When the piece is selected
 		this.material= selectedMaterial1;
 	}
+	setAsMovable() {
+		// Change material to the movable material
+		this.material= selectableMaterial1;
+	}
+	deselect() {
+		// Reset material color
+		this.material= this.value == 1? pieceMaterial1: pieceMaterial2;
+	}
 	/********************************* PIECE LOGICS **************************************************/
 	setDisplacement(index) {
 		// Return the displacement according from this piece to any adjacent index: displacement is basically index.x - this.x and index.y - this.y
@@ -79,9 +87,5 @@ export default class Piece extends Mesh {
 	}	
 	setMoves(moveObject) {
 		this.moves= moveObject;
-	}
-	setAsMovable() {
-		// Change material to the movable material
-		this.material= selectableMaterial1;
 	}
 }

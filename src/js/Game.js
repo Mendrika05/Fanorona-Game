@@ -18,6 +18,7 @@ export default class Game {
 		*/
 		this.game= [];	// Will contain the logic
 		this.actual= undefined;
+		this.movablePieces= [];	// To store the piece that can move for this turn
 		this.board= new Board(scene);	// The game board to the global scene
 
 		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
@@ -32,6 +33,7 @@ export default class Game {
 		// Initialize the moves
 		this.turn= 1;	// The initial turn
 		this.processAllMoves();
+		this.swapTurn();
 		/************************************************** END OF PIECE PLACING **********************************************/
 	}	// End of constructor
 
@@ -123,6 +125,12 @@ export default class Game {
 
 	swapTurn() {
 		this.actual= undefined;	// Set actual piece to undefined
+		// Reset the colors of the pieces
+		if (this.movablePieces.length > 0) {
+			this.movablePieces.forEach((piece) => {
+				piece.deselect();
+			});
+		}
 		if (!this.winnerExists()) {
 			// If there is no winner yet
 			this.turn*= -1;	// Swap turn
