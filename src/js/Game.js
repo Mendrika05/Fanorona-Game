@@ -16,6 +16,8 @@ export default class Game {
 			THIS IS TO MARK THE POSITION OF THE PIECE IN THE MOVE ARRAY
 		*/
 		this.game= [];	// Will contain the logic
+		this.turn= 1;	// The initial turn
+		this.actual= undefined;
 		this.board= new Board(scene);	// The game board to the global scene
 
 		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
@@ -91,7 +93,8 @@ export default class Game {
 		}
 	}
 
-	checkForWinner() {
+	/***************************** GAME MANAGEMENT ****************************************/
+	winnerExists() {
 		// Check if there is a winner
 		let nPlayer1= 0, nPlayer2= 0;	// Number of pieces for player 1 and 2
 		for (let elt of this.game) {
@@ -112,5 +115,19 @@ export default class Game {
 			}	// End if for piece selection
 		}	// End for
 		return nPlayer1? 1: -1;	// 1 if player 1 is winning and -1 if player 2 is winning
+	}
+
+	swapTurn() {
+		if (!this.winnerExists) {
+			// If there is no winner yet
+			this.turn*= -1;	
+		}
+	}
+
+	/****************************** SETTERS *************************************************/
+	/* ACTUAL PIECE setter */
+	set setActual(piece) {
+		// Set the actual properties
+		this.actual= piece;
 	}
 }

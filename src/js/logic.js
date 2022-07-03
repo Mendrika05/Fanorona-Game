@@ -1,6 +1,7 @@
 import { Fog, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import Game from './Game';	// The game logic
+import { onBoardClick } from './eventHandlers2';
 import { renderer, scene, camera,  control, COLORS } from './constants';	// Import the basic utilities
 
 function render() {
@@ -49,9 +50,16 @@ const init= () => {
 	// scene.add(new DirectionalLightHelper(directional));
 	// scene.add(new CameraHelper(directional.shadow.camera));
 	// scene.add(new AxesHelper(5));
-	const canvas= renderer.domElement;	// Get the canvas
 
 	console.log(game.getGameMatrix());
+
+
+	/********************************************* EVENT HANDLERS ******************************************************/
+	let canvas= renderer.domElement;	// To make the process easier
+
+	canvas.addEventListener('click', (e) => {
+		onBoardClick(e, game);
+	});
 
 	render();	// Render the final results
 }

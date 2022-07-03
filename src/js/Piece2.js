@@ -6,6 +6,7 @@ import { COLORS } from './constants';
 const pieceGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 60);	// Piece Geometry
 const pieceMaterial1= new MeshStandardMaterial({color: COLORS.PLAYER1});	// Piece Material for Player 1
 const pieceMaterial2= new MeshStandardMaterial({color: COLORS.PLAYER2});	// Piece Material for Player 2
+const selectedMaterial1= new MeshStandardMaterial({color: COLORS.SELECTION});
 
 export default class Piece extends Mesh {
 	constructor(value, index) {
@@ -22,4 +23,10 @@ export default class Piece extends Mesh {
 		this.value= value;	// 1 means grey, -1 means white
 		this.castShadow= true;	// Shadow
 	}	// End of constructor
+
+	/************************* USER INTERFACE CHANGES *********************************/
+	select() {
+		// When the piece is selected
+		this.material= selectedMaterial1;
+	}
 }
