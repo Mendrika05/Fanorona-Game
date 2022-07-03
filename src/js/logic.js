@@ -51,8 +51,6 @@ const init= () => {
 	// scene.add(new CameraHelper(directional.shadow.camera));
 	// scene.add(new AxesHelper(5));
 
-	console.log(game.getGameMatrix());
-
 
 	/********************************************* EVENT HANDLERS ******************************************************/
 	let canvas= renderer.domElement;	// To make the process easier

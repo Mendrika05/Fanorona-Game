@@ -33,7 +33,6 @@ export default class Game {
 		// Initialize the moves
 		this.turn= 1;	// The initial turn
 		this.processAllMoves();
-		this.swapTurn();
 		/************************************************** END OF PIECE PLACING **********************************************/
 	}	// End of constructor
 

@@ -1,12 +1,18 @@
 /********************************** GAME BOARD USER INTERFACE ****************************************/
-import { PlaneGeometry, BoxGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, DoubleSide } from 'three';
+import { PlaneGeometry, BoxGeometry, CylinderGeometry, MeshStandardMaterial, TextureLoader, LinearFilter, Mesh, MeshBasicMaterial, DoubleSide } from 'three';
 import { COLORS } from './constants';
 import Laka from '../img/Laka.png';
+
+const plotGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 10);
+const plotMaterial= new MeshStandardMaterial({
+	color: COLORS.SELECTION,
+	wireframe: true,
+});
 
 export default class Board extends Mesh {
 	constructor(scene) {
 		super(
-			new BoxGeometry(9, 0.25, 5),
+			new BoxGeometry(9, 0.25, 5),	// Length, height, width
 			new MeshStandardMaterial({
 				color: COLORS.BOARD,
 			})
@@ -32,28 +38,25 @@ export default class Board extends Mesh {
 		// Board property
 		this.receiveShadow= true;	// Receive shadow
 		this.castShadow= true;	// Cast shadow
+		this.plots= [];	// The plots for the validated actual piece moves
 		this.add(mark);
 
 		// this.inRotation= true;	// Rotation flag
 		// this.rotate();
 		/*************************************************** THE TABLE *********************************************************/
-		const plane= new Mesh(
-				new PlaneGeometry(15, 8),
+		const table= new Mesh(
+				new BoxGeometry(12, 0.2, 6.5),
 				new MeshStandardMaterial({
-					color: 0x3F1A0B,
-					side: DoubleSide
+					color: COLORS.TABLE,
 				})
 			);
-		this.add(plane);
+		this.add(table);
 		// Table properties
-		plane.rotation.x= 0.5 * Math.PI;
-		plane.position.y= -0.13;
-		plane.receiveShadow= true;
-
+		table.position.y= -0.22;
+		table.receiveShadow= true;
 		// Add it to the scene
 		scene.add(this);
 	}	// end of contructor()
-
 
 	place(piece) {
 		// Place a piece on the board
@@ -69,5 +72,24 @@ export default class Board extends Mesh {
 		// Position it
 		const x= piece.index % 9 -  4, y= parseInt(piece.index / 9) - 2;	// The position in the board is x= col - 4, y= lig - 2 where col= index % 9 and lig= parseInt((index / 9)
 		piece.position.set(x, 0.19, y);	// x and z in 3D are respectively x and y in 2D
+	}
+	plot(index) {
+		// Plot a the index on the board
+		let mark= new Mesh(plotGeometry, plotMaterial);
+		this.add(mark);
+		this.plots.push(mark);
+
+		// Positionning
+		/*
+			In the UI, given an index (here named point):
+			x= -4 + j <========> j= x + 4 where j= point % 9
+			y= -2 + i <========> i= y + 2 where i= parseInt(point / 9)
+			SO:
+			x= point % 9 - 4;
+			y= parseInt(point / 9) - 2;
+		*/
+		let x= index % 9 - 4;
+		let y= parseInt(index / 9) - 2;
+		mark.position.set(x, 0.19, y);
 	}
 }

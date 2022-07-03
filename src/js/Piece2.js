@@ -32,6 +32,7 @@ export default class Piece extends Mesh {
 	select() {
 		// When the piece is selected
 		this.material= selectedMaterial1;
+		this.plotMoves();
 	}
 	setAsMovable() {
 		// Change material to the movable material
@@ -40,6 +41,15 @@ export default class Piece extends Mesh {
 	deselect() {
 		// Reset material color
 		this.material= this.value == 1? pieceMaterial1: pieceMaterial2;
+	}
+	plotMoves() {
+		// Plot valid moves
+		for (let move in this.moves) {
+			for (let point of this.moves[move]) {
+				// Plot valid moves on the board aka this.parent
+				this.parent.plot(point);	// Add the plot to the board
+			}
+		}
 	}
 	/********************************* PIECE LOGICS **************************************************/
 	setDisplacement(index) {
