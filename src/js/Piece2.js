@@ -31,14 +31,17 @@ export default class Piece extends Mesh {
 	/**************************** USER INTERFACE CHANGES *********************************/
 	default() {
 		// Set default value
-		this.movable= false;
-		this.moves= undefined;
-		this.displacement= 0;
-		this.material= this.value == 1? pieceMaterial1: pieceMaterial2;
+		this.movable= false;	// Can't move
+		this.moves= undefined;	// Has no moves
+		this.material= this.value == 1? pieceMaterial1: pieceMaterial2;	// Reset material
 	}
 	select() {
 		// When the piece is selected
 		this.material= selectedMaterial1;
+	}
+	deselect() {
+		// Reset it as a selectable piece
+		this.material= selectableMaterial1;
 	}
 	setAsMovable() {
 		// Change material to the movable material

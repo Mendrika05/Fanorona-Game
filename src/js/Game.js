@@ -259,8 +259,15 @@ export default class Game {
 	/******************************************************* ACTUAL PIECE setter ******************************************/
 	set setActual(piece) {
 		// Set the actual properties
+		if (this.actual != undefined) {
+			// First deselect the actual piece
+			this.actual.deselect();
+			// Clear the board from previous marks
+			this.board.unplot();
+		}
+		// Set the new actual piece
 		this.actual= piece;
-
+		piece.select();	// UI
 		// Plot the moves of the actual piece on the board
 		for (let move in piece.moves) {
 			for (let point of piece.moves[move]) {

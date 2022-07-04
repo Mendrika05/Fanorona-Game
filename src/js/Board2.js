@@ -74,7 +74,7 @@ export default class Board extends Mesh {
 		piece.position.set(x, 0.19, y);	// x and z in 3D are respectively x and y in 2D
 	}
 	plot(index) {
-		// Plot a the index on the board
+		// Plot a mark at the index on the board
 		let mark= new Mesh(plotGeometry, plotMaterial);
 		this.add(mark);
 		this.plots.push(mark);
@@ -92,5 +92,17 @@ export default class Board extends Mesh {
 		let y= parseInt(index / 9) - 2;
 		mark.position.set(x, 0.19, y);
 		mark.userData.canDropHere= true;	// Set it so that the piece can move on it
+	}
+	unplot() {
+		// Clear the board from move marks
+		if (this.plots.length) {
+			// Dispose material and geometry
+			this.plots[0].geometry.dispose();
+			this.plots[0].material.dispose();
+			// Unplot properly
+			for (let mark of this.plots) {
+				this.remove(mark);
+			}
+		}
 	}
 }
