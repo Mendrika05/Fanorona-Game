@@ -19,6 +19,7 @@ export default class Game {
 		this.game= [];	// Will contain the logic
 		this.actual= undefined;	// The selected piece
 		this.displacement= 0;	// The displacement of the actual piece
+		this.moveSequence= [];	// To store the move sequence
 		this.movablePieces= [];	// To store the piece that can move for this turn
 		this.board= new Board(scene);	// The game board to the global scene
 
@@ -125,6 +126,7 @@ export default class Game {
 
 	swapTurn() {
 		this.actual= undefined;	// Set actual piece to undefined
+		this.moveSequence= [];	// Reset move sequence
 		// Reset the colors of the pieces
 		if (this.movablePieces.length > 0) {
 			this.movablePieces.forEach((piece) => {
@@ -211,6 +213,7 @@ export default class Game {
 			}	// End if adjacents[i] !== null
 		}	// End for
 
+		// Filter the moves
 		// Adding the moves to the piece
 		if (percussions.length || aspirations.length) {
 			// In case of captures
@@ -221,7 +224,16 @@ export default class Game {
 			piece.setMoves= {normalMoves};	// Set valid moves
 		}
 	}
-
+	filterMoves() {
+		// Takeout places where the actual piece already went and where the displacement is same as teh previous one
+		let validMoves= {};	// Empty object
+		for (let move in this.actual.moves) {
+			validMoves[move]= this.actual.moves[move].filter((index) => {
+				// Return true when the sequence does not includes index and the displacement is not the same as the previous one displacement
+				return !this.moveSequence.includes(index) && Math.abs(index - this.actual.index) != Math.abs(this.displacement);
+			});
+		}
+	}
 	processAllMoves() {
 		this.movablePieces= [];	// To store the movable piece
 		// PROCESS THE VALID MOVES
@@ -273,6 +285,7 @@ export default class Game {
 	drop(canDropHere) {
 		// Drop the piece on the object emplacement
 		this.actual.position.set(canDropHere.position.x, 0.19, canDropHere.position.z);	// Set the actual piece position
+		this.board.unplot();	// Remove the board marks
 		// Make the others unmovable as actual has already been moved
 		for (let piece of this.movablePieces) {
 			if (piece != this.actual) {

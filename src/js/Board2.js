@@ -110,5 +110,6 @@ export default class Board extends Mesh {
 				this.remove(mark);
 			}
 		}
+		this.plots= [];	// Reset the plots as an empty array
 	}
 }
