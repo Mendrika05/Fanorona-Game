@@ -138,7 +138,6 @@ export default class Game {
 		}	// End if no winner yet
 	}
 
-	/****************************** SETTERS *************************************************/
 	/********************************* PIECE LOGICS **************************************************/
 	setDisplacement(index) {
 		// Return the displacement according from the actual piece index to any adjacent index: displacement is basically index.x - actual.x and index.y - this.y
@@ -215,11 +214,11 @@ export default class Game {
 		// Adding the moves to the piece
 		if (percussions.length || aspirations.length) {
 			// In case of captures
-			piece.setMoves({percussions, aspirations});
+			piece.setMoves= {percussions, aspirations};
 		}
 		else {
 			// Normal moves
-			piece.setMoves({normalMoves});
+			piece.setMoves= {normalMoves};	// Set valid moves
 		}
 	}
 
@@ -231,7 +230,7 @@ export default class Game {
 			if (element != 0 && element.value == this.turn) {
 				// Piece having the turn
 				this.processMoves(element);
-				if (element.moves.normalMoves == undefined) {
+				if (element.canCapture) {
 					// If a piece can capture
 					if (!canCapture) {
 						// The first element that can capture
@@ -256,7 +255,7 @@ export default class Game {
 			piece.setAsMovable();	// To implement
 		});
 	}
-	/******************************************************* ACTUAL PIECE setter ******************************************/
+	/******************************************************* ACTUAL PIECE logics ******************************************/
 	set setActual(piece) {
 		// Set the actual properties
 		if (this.actual != undefined) {
@@ -269,10 +268,25 @@ export default class Game {
 		this.actual= piece;
 		piece.select();	// UI
 		// Plot the moves of the actual piece on the board
-		for (let move in piece.moves) {
-			for (let point of piece.moves[move]) {
-				this.board.plot(point);	// Add the plot to the board
+		this.board.plot(piece);
+	}
+	drop(canDropHere) {
+		// Drop the piece on the object emplacement
+		this.actual.position.set(canDropHere.position.x, 0.19, canDropHere.position.z);	// Set the actual piece position
+		// Make the others unmovable as actual has already been moved
+		for (let piece of this.movablePieces) {
+			if (piece != this.actual) {
+				piece.default();	// Reset to default (can't move, no move valid, changed color)
 			}
 		}
+		// Recalculate actual piece moves
+		this.processMoves(this.actual);
+
+		// If no capture (as a second move is only allowed by captures), drop definitively
+		if (!this.actual.canCapture) {
+			this.actual.default();
+			this.actual= undefined;	// Reset the actual piece
+		}
+	
 	}
 }

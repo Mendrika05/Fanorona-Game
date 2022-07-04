@@ -28,8 +28,9 @@ const onBoardClick= (event, game) => {
 			// Obj is a piece
 			game.setActual= obj;
 		}
-		else if (inters[0].object.userData.canDropHere) {	// Piece drop
-			game.actual.drop(inters[0].object);	// Pass the object to allow the dropping on the exact point
+		else if (obj.userData.canDropHere) {	// Piece drop
+			game.drop(obj);	// Drop the actual piece
+			// game.actual.drop(obj);	// Pass the object to allow the dropping on the exact point
 		}
 	}
 }

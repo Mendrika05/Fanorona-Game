@@ -73,25 +73,31 @@ export default class Board extends Mesh {
 		const x= piece.index % 9 -  4, y= parseInt(piece.index / 9) - 2;	// The position in the board is x= col - 4, y= lig - 2 where col= index % 9 and lig= parseInt((index / 9)
 		piece.position.set(x, 0.19, y);	// x and z in 3D are respectively x and y in 2D
 	}
-	plot(index) {
-		// Plot a mark at the index on the board
-		let mark= new Mesh(plotGeometry, plotMaterial);
-		this.add(mark);
-		this.plots.push(mark);
+	plot(piece) {
+		// Plot a mark at all the valid moves for a given piece
+		
 
-		// Positionning
-		/*
-			In the UI, given an index (here named point):
-			x= -4 + j <========> j= x + 4 where j= point % 9
-			y= -2 + i <========> i= y + 2 where i= parseInt(point / 9)
-			SO:
-			x= point % 9 - 4;
-			y= parseInt(point / 9) - 2;
-		*/
-		let x= index % 9 - 4;
-		let y= parseInt(index / 9) - 2;
-		mark.position.set(x, 0.19, y);
-		mark.userData.canDropHere= true;	// Set it so that the piece can move on it
+		for (let move in piece.moves) {
+			for (let point of piece.moves[move]) {
+				let mark= new Mesh(plotGeometry, plotMaterial);
+				this.add(mark);
+				this.plots.push(mark);
+
+				// Positionning
+				/*
+					In the UI, given an index (here named point):
+					x= -4 + j <========> j= x + 4 where j= point % 9
+					y= -2 + i <========> i= y + 2 where i= parseInt(point / 9)
+					SO:
+					x= point % 9 - 4;
+					y= parseInt(point / 9) - 2;
+				*/
+				let x= point % 9 - 4;
+				let y= parseInt(point / 9) - 2;
+				mark.position.set(x, 0.19, y);
+				mark.userData.canDropHere= true;	// Set it so that the piece can move on it
+			}	// End for point of piece.moves
+		}	// End for move in piece.moves
 	}
 	unplot() {
 		// Clear the board from move marks

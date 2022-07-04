@@ -48,11 +48,6 @@ export default class Piece extends Mesh {
 		this.movable= true;
 		this.material= selectableMaterial1;
 	}
-	drop(canDropHere) {
-		// Drop the piece on the object emplacement
-		this.position.set(canDropHere.position.x, 0.19, canDropHere.position.z);
-		this.default();	// Reset color
-	}
 	
 	getMoveMethod(disp) {
 		// Get the move method according to this.displacement
@@ -75,7 +70,12 @@ export default class Piece extends Mesh {
 				return lowerRight;
 		}
 	}	
-	setMoves(moveObject) {
+	set setMoves(moveObject) {
 		this.moves= moveObject;
 	}
+	get canCapture() {
+		// Return true if the piece can capture, else false
+		return (this.moves.percussions != undefined || this.moves.aspirations != undefined);
+	}
+
 }
