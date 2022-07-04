@@ -26,7 +26,6 @@ export default class Piece extends Mesh {
 		this.movable= false;	// If it is selectable then we can drag it
 		this.castShadow= true;	// Shadow
 		this.moves= undefined;	// To track moves
-		this.displacement= 0;	// Displacement is either up/down (-9, 9), left/right (-1, +1) or one of the diagonals
 	}	// End of constructor
 
 	/**************************** USER INTERFACE CHANGES *********************************/
@@ -51,29 +50,7 @@ export default class Piece extends Mesh {
 		this.position.set(canDropHere.position.x, 0.19, canDropHere.position.z);
 		this.default();	// Reset color
 	}
-	/********************************* PIECE LOGICS **************************************************/
-	setDisplacement(index) {
-		// Return the displacement according from this piece to any adjacent index: displacement is basically index.x - this.x and index.y - this.y
-		let x= parseInt(this.index / 9);	// Get the line
-		let y= this.index % 9;
-		let a= parseInt(index /9);
-		let b= index % 9;
-
-		let r;
-		if (x == a) {
-			// Same row
-			this.displacement= y > b? -1: 1;
-		}
-		else if (y == b) {
-			// Same column
-			this.displacement= x > a? -9: 9;
-		}
-		else if (x > a) {
-			this.displacement= y > b? -10: -8;
-		}
-		else 
-			this.displacement= y > b? 8: 10;
-	}
+	
 	getMoveMethod(disp) {
 		// Get the move method according to this.displacement
 		switch (disp) {

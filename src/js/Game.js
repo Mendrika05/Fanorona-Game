@@ -17,7 +17,8 @@ export default class Game {
 			THIS IS TO MARK THE POSITION OF THE PIECE IN THE MOVE ARRAY
 		*/
 		this.game= [];	// Will contain the logic
-		this.actual= undefined;
+		this.actual= undefined;	// The selected piece
+		this.displacement= 0;	// The displacement of the actual piece
 		this.movablePieces= [];	// To store the piece that can move for this turn
 		this.board= new Board(scene);	// The game board to the global scene
 
@@ -138,7 +139,29 @@ export default class Game {
 	}
 
 	/****************************** SETTERS *************************************************/
-	/* PIECES MOVES LOGIC */
+	/********************************* PIECE LOGICS **************************************************/
+	setDisplacement(index) {
+		// Return the displacement according from the actual piece index to any adjacent index: displacement is basically index.x - actual.x and index.y - this.y
+		let x= parseInt(this.actual.index / 9);	// Get the line
+		let y= this.actual.index % 9;
+		let a= parseInt(index /9);
+		let b= index % 9;
+
+		let r;
+		if (x == a) {
+			// Same row
+			this.displacement= y > b? -1: 1;
+		}
+		else if (y == b) {
+			// Same column
+			this.displacement= x > a? -9: 9;
+		}
+		else if (x > a) {
+			this.displacement= y > b? -10: -8;
+		}
+		else 
+			this.displacement= y > b? 8: 10;
+	}
 	processMoves(piece) {
 		// Process the valid moves for a given piece
 		// LINEAR MOVES
