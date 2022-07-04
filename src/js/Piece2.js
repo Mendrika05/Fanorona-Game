@@ -75,7 +75,7 @@ export default class Piece extends Mesh {
 	}
 	get canCapture() {
 		// Return true if the piece can capture, else false
-		return (this.moves.percussions != undefined || this.moves.aspirations != undefined);
+		return (this.moves.percussions != undefined && this.moves.percussions.length || this.moves.aspirations && this.moves.aspirations.length);
 	}
 
 }

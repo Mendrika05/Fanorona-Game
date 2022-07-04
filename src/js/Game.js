@@ -166,6 +166,8 @@ export default class Game {
 	processMoves(piece) {
 		// Process the valid moves for a given piece
 		// LINEAR MOVES
+		// Reset the moves
+		piece.setMoves= {};
 		let adjacents= Mover.cross(piece.index, 1);	// For adjacent positions
 		let seconds= Mover.cross(piece.index, 2);	// For captures
 		let normalMoves= [];	// Normal moves
@@ -205,14 +207,13 @@ export default class Game {
 					}	// End if
 					else {
 						let aspiration= adjacents[i-1];
-						if (aspiration !== null && this.game[aspiration] && this.game[aspiration].value != piece.value) {
+						if (aspiration !== null && this.game[aspiration] && this.game[aspiration].value != this.turn) {
 							aspirations.push(adjacents[i]);	// Push the aspirations array
 						}
 					}	// End else
 				}	// End if place == 0
 			}	// End if adjacents[i] !== null
 		}	// End for
-
 		// Filter the moves
 		// Adding the moves to the piece
 		if (percussions.length || aspirations.length) {
@@ -231,8 +232,9 @@ export default class Game {
 			validMoves[move]= this.actual.moves[move].filter((index) => {
 				// Return true when the sequence does not includes index and the displacement is not the same as the previous one displacement
 				return !this.moveSequence.includes(index) && Math.abs(index - this.actual.index) != Math.abs(this.displacement);
-			});
-		}
+			});	// End foreach
+		}	// End for move of actual.moves
+		this.actual.setMoves= validMoves;	// Set the moves of the actual piece
 	}
 	processAllMoves() {
 		this.movablePieces= [];	// To store the movable piece
@@ -292,14 +294,28 @@ export default class Game {
 				piece.default();	// Reset to default (can't move, no move valid, changed color)
 			}
 		}
-		// Recalculate actual piece moves
-		this.processMoves(this.actual);
 
+		// New index is given by 9 * (canDropHere.position.z + 2) + canDropHere.position.x + 4
+		let index= 9 * (canDropHere.position.z + 2) + canDropHere.position.x + 4;
+		
+		this.setDisplacement(index);	// Set the displacement
+		// Move the piece in the game array
+		this.game[this.actual.index]= 0;	// Change the value of the previous position in the array
+		this.game[index]= this.actual;	// Put the actual piece in its new index
+		this.actual.index= index; 	// Set the new index
+		this.moveSequence.push(index);	// Push the moveSequence array
+
+		this.processMoves(this.actual);	// Recalculate actual piece moves
+		this.filterMoves();	// Filter the moves
+		console.log(this.actual.moves, this.actual.canCapture);
 		// If no capture (as a second move is only allowed by captures), drop definitively
 		if (!this.actual.canCapture) {
 			this.actual.default();
 			this.actual= undefined;	// Reset the actual piece
 		}
-	
+		else {
+			// Plot valid moves
+			this.board.plot(this.actual);
+		}
 	}
 }
