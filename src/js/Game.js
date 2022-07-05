@@ -288,31 +288,41 @@ export default class Game {
 		this.actual.setMoves= validMoves;	// Set the moves of the actual piece
 	}
 	processAllMoves() {
+		// Change gui
 		this.movablePieces= [];	// To store the movable piece
 		// PROCESS THE VALID MOVES
 		let canCapture= false;	// Flag to see if the actual player can capture
 		for (let element of this.game) {
-			if (element != 0 && element.value == this.turn) {
-				// Piece having the turn
-				this.processMoves(element);
-				if (element.canCapture) {
-					// If a piece can capture
-					if (!canCapture) {
-						// The first element that can capture
-						canCapture= true;
-						this.movablePieces= [element];	// A new array containing the actual piece
-					}
+			if (element != 0) {
+				// Set default color
+				element.default();
+				if (element.value == this.turn) {
+					// Piece having the turn
+					this.processMoves(element);
+					if (element.canCapture) {
+						// If a piece can capture
+						if (!canCapture) {
+							// The first element that can capture
+							canCapture= true;
+							this.movablePieces= [element];	// A new array containing the actual piece
+						}
+						else {
+							this.movablePieces.push(element);	// Add to the movable piece
+						}
+					}	// End if the element can capture
 					else {
-						this.movablePieces.push(element);	// Add to the movable piece
-					}
-				}	// Enf if the element can capture
-				else {
-					// Normal moves
-					if (!canCapture) {
-						this.movablePieces.push(element);
-					}
-				}	// End if the element has only normal moves
-			}	// End if element is not 0
+						// Normal moves
+						if (!canCapture) {
+							this.movablePieces.push(element);
+						}
+					}	// End if the element has only normal moves
+				}	// End if element is not 0
+				else if (element != 0) {
+					// Set opponent piece as movable because they need to be marked
+					element.setAsMovable();
+					element.movable= false;	// Make them unable to move or even be selected
+				}
+			}
 		};	// End forEach
 
 		// Change gui
@@ -394,12 +404,14 @@ export default class Game {
 		if (this.choices.indexOf(piece.index) == 0) {
 			// Percute
 			this.capture(true);
-			this.game[this.choices[1]].default();	// Set the other one as default value
+			this.game[this.choices[1]].setAsMovable();	// Set the other one's color
+			this.game[this.choices[1]].movable= false;	// Don't allow it to move
 		}
 		else {
 			// Aspire
 			this.capture(false);
-			this.game[this.choices[0]].default();	// Set the other one as default value
+			this.game[this.choices[0]].setAsMovable();	// Set the other one's color
+			this.game[this.choices[0]].movable= false;	// Don't allow it to move
 		}
 		// Reset choice to an empty array
 		this.choices= [];
