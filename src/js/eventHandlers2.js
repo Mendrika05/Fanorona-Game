@@ -2,7 +2,7 @@
 	MANAGES THE EVENTS ON THE BOARD
 */
 import { Raycaster, Vector2 } from 'three';
-import { renderer, camera } from './constants';
+import { renderer, scene, camera } from './constants';
 
 let width= window.innerWidth / 1.2, height= window.innerHeight / 1.01;	// Canvas size
 const rayCaster= new Raycaster();
@@ -39,6 +39,21 @@ const onBoardClick= (event, game) => {
 	}
 }
 
+const onScreenResize= () => {
+	// Help resize the screen for more responsivity
+	// Screen size
+	width= window.innerWidth / 1.2;
+	height= window.innerHeight / 1.01;
+
+	renderer.setSize(width, height);
+
+	camera.aspect= width / height;	// Aspect
+	camera.updateProjectionMatrix();	// Because camera's property has been updated
+	
+	renderer.render(scene, camera);	// Render
+}
+
 export {
 	onBoardClick,
+	onScreenResize
 }
