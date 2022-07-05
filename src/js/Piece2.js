@@ -4,10 +4,11 @@ import { COLORS } from './constants';
 
 // PIECES' GEOMETRY AND MATERIALS
 const pieceGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 60);	// Piece Geometry
-const pieceMaterial1= new MeshStandardMaterial({color: COLORS.PLAYER1});	// Piece Material for Player 1
-const pieceMaterial2= new MeshStandardMaterial({color: COLORS.PLAYER2});	// Piece Material for Player 2
+const pieceMaterial1= new MeshStandardMaterial({color: COLORS.PLAYER1, transparent: true, opacity: .5});	// Piece Material for Player 1
+const pieceMaterial2= new MeshStandardMaterial({color: COLORS.PLAYER2, transparent: true, opacity: .5});	// Piece Material for Player 2
 const selectedMaterial1= new MeshStandardMaterial({color: COLORS.SELECTION});	// Selection piece for Player 1
-const selectableMaterial1= new MeshStandardMaterial({color: COLORS.SELECTABLE});	// Selectable piece for Player 1
+const selectableMaterial1= new MeshStandardMaterial({color: COLORS.PLAYER1});	// Selectable piece for Player 1
+const selectableMaterial2= new MeshStandardMaterial({color: COLORS.PLAYER2});	// Selectable piece for Player 1
 const capturableMaterial1= new MeshStandardMaterial({color: 0xff0000});	// Selectable piece for Player 1
 
 export default class Piece extends Mesh {
@@ -41,14 +42,10 @@ export default class Piece extends Mesh {
 		// When the piece is selected
 		this.material= selectedMaterial1;
 	}
-	deselect() {
-		// Reset it as a selectable piece
-		this.material= selectableMaterial1;
-	}
 	setAsMovable() {
 		// Change material to the movable material
 		this.movable= true;
-		this.material= selectableMaterial1;
+		this.material= this.value == 1? selectableMaterial1: selectableMaterial2
 	}
 	setAsCapturable() {
 		// Set the piece as capturable

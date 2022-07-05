@@ -325,7 +325,7 @@ export default class Game {
 		// Set the actual properties
 		if (this.actual != undefined) {
 			// First deselect the actual piece
-			this.actual.deselect();
+			this.actual.setAsMovable();
 			// Clear the board from previous marks
 			this.board.unplot();
 		}
