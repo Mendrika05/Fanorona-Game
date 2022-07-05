@@ -1,7 +1,7 @@
 import { Fog, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import Game from './Game';	// The game logic
-import { onBoardClick, onScreenResize } from './eventHandlers2';
+import { onBoardClick, onScreenResize, onMouseMove } from './eventHandlers2';
 import { renderer, scene, camera,  control, COLORS } from './constants';	// Import the basic utilities
 
 function render() {
@@ -58,6 +58,9 @@ const init= () => {
 	window.addEventListener('resize', onScreenResize);
 	canvas.addEventListener('click', (e) => {
 		onBoardClick(e, game);
+	});
+	canvas.addEventListener('mousemove', (event) => {
+		onMouseMove(event, game.board);	// Pass the board as the second parameter
 	});
 
 	render();	// Render the final results
