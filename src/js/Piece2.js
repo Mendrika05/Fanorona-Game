@@ -1,7 +1,6 @@
 /********************** PIECE CLASS DEFINITION ************************/
 import { CylinderGeometry, MeshStandardMaterial, Mesh } from 'three';
 import { COLORS } from './constants';
-import { top, bottom, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
 
 // PIECES' GEOMETRY AND MATERIALS
 const pieceGeometry= new CylinderGeometry(0.23, 0.23, 0.12, 60);	// Piece Geometry
@@ -9,6 +8,7 @@ const pieceMaterial1= new MeshStandardMaterial({color: COLORS.PLAYER1});	// Piec
 const pieceMaterial2= new MeshStandardMaterial({color: COLORS.PLAYER2});	// Piece Material for Player 2
 const selectedMaterial1= new MeshStandardMaterial({color: COLORS.SELECTION});	// Selection piece for Player 1
 const selectableMaterial1= new MeshStandardMaterial({color: COLORS.SELECTABLE});	// Selectable piece for Player 1
+const capturableMaterial1= new MeshStandardMaterial({color: 0xff0000});	// Selectable piece for Player 1
 
 export default class Piece extends Mesh {
 	constructor(value, index) {
@@ -24,6 +24,7 @@ export default class Piece extends Mesh {
 		this.index= index;	// The position in the current array
 		this.value= value;	// 1 means grey, -1 means white
 		this.movable= false;	// If it is selectable then we can drag it
+		this.capturable= false;	// Not capturable
 		this.castShadow= true;	// Shadow
 		this.moves= undefined;	// To track moves
 	}	// End of constructor
@@ -33,6 +34,7 @@ export default class Piece extends Mesh {
 		// Set default value
 		this.movable= false;	// Can't move
 		this.moves= undefined;	// Has no moves
+		this.capturable= false;	// Not capturable
 		this.material= this.value == 1? pieceMaterial1: pieceMaterial2;	// Reset material
 	}
 	select() {
@@ -48,28 +50,11 @@ export default class Piece extends Mesh {
 		this.movable= true;
 		this.material= selectableMaterial1;
 	}
-	
-	getMoveMethod(disp) {
-		// Get the move method according to this.displacement
-		switch (disp) {
-			case -9:
-				return up;
-			case 9:
-				return down;
-			case -1:
-				return left;
-			case 1:
-				return right;
-			case -8:
-				return upperRight;
-			case 8:
-				return lowerLeft;
-			case -10:
-				return upperLeft;
-			case +10:
-				return lowerRight;
-		}
-	}	
+	setAsCapturable() {
+		// Set the piece as capturable
+		this.material= capturableMaterial1;
+		this.capturable= true;
+	}
 	set setMoves(moveObject) {
 		this.moves= moveObject;
 	}

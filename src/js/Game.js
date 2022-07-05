@@ -1,8 +1,8 @@
 /*************** WILL CONATIN THE GAME'S LOGIC *********************/
 import Board from './Board2';	// Board GUI
 import Piece from './Piece2';	// Piece GUI
-import { renderer, scene, camera,  control, COLORS, player1Color, player2Color } from './constants';	// Import the basic utilities
-import { Mover } from './moves';
+import { renderer, scene, camera } from './constants';	// Import the camera to allow view swapping
+import { up, down, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
 
 export default class Game {
 	constructor() {
@@ -21,6 +21,7 @@ export default class Game {
 		this.displacement= 0;	// The displacement of the actual piece
 		this.moveSequence= [];	// To store the move sequence
 		this.movablePieces= [];	// To store the piece that can move for this turn
+		this.choices= [];	// The choices array in case of capture conflict
 		this.board= new Board(scene);	// The game board to the global scene
 
 		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
@@ -123,9 +124,11 @@ export default class Game {
 		}	// End for
 		return nPlayer1? 1: -1;	// 1 if player 1 is winning and -1 if player 2 is winning
 	}
-
 	swapTurn() {
+		// Swap turn
+		this.actual.default();	// Return to default
 		this.actual= undefined;	// Set actual piece to undefined
+		this.displacement= 0;	// Reset displacement
 		this.moveSequence= [];	// Reset move sequence
 		// Reset the colors of the pieces
 		if (this.movablePieces.length > 0) {
@@ -137,9 +140,36 @@ export default class Game {
 			// If there is no winner yet
 			this.turn*= -1;	// Swap turn
 			this.processAllMoves();	// Process all moves for the Player having the turn
+			this.swapView()// Turn the camera
 		}	// End if no winner yet
+		else {
+			alert("Player " + (this.turn == 1? "1": "2") + " won the game");
+		}
 	}
-
+	swapView() {
+		// Swap the camera's view
+		if (parseInt(camera.position.z) != parseInt(this.turn * 2)) {
+			requestAnimationFrame(this.swapView.bind(this));	// Recall the method for the animation
+			camera.position.x= camera.position.z * this.turn > 0? 0.2: 0.5;
+			camera.position.y= 5;
+			camera.position.z+= this.turn < 0? -0.1: 0.1;
+			camera.updateProjectionMatrix();	// When changing the thing we need to set this
+			renderer.render(scene, camera);
+			// control.update();	// Update only when done rendering
+		}
+		else {
+			// Reset x position
+			if (camera.position.x < 0) {
+				// Finish
+				camera.position.set(0, 5, this.turn * 2)
+			}
+			else {
+				// Still with animation
+				requestAnimationFrame(this.swapView.bind(this));
+				camera.position.x-= 0.01;	
+			}
+		}
+	}
 	/********************************* PIECE LOGICS **************************************************/
 	setDisplacement(index) {
 		// Return the displacement according from the actual piece index to any adjacent index: displacement is basically index.x - actual.x and index.y - this.y
@@ -162,6 +192,27 @@ export default class Game {
 		}
 		else 
 			this.displacement= y > b? 8: 10;
+	}
+	getMoveMethod(displacement) {
+		// Get the move method according to a given displacement
+		switch (displacement) {
+			case -9:
+				return up;
+			case 9:
+				return down;
+			case -1:
+				return left;
+			case 1:
+				return right;
+			case -8:
+				return upperRight;
+			case 8:
+				return lowerLeft;
+			case -10:
+				return upperLeft;
+			case +10:
+				return lowerRight;
+		}
 	}
 	processMoves(piece) {
 		// Process the valid moves for a given piece
@@ -284,6 +335,76 @@ export default class Game {
 		// Plot the moves of the actual piece on the board
 		this.board.plot(piece);
 	}
+	capture(isPercussion= true) {
+		// Capture logic
+		let move, index;	// Move method and the index of the piece to be removed
+
+		if (isPercussion) {
+			// To move
+			move= this.getMoveMethod(this.displacement);	// Get the move method to analyse the displacement
+			index= move(this.actual.index, 1);	// Adjacent piece
+		}
+		// Aspiration
+		else {
+			//  While index is not null and the index has a piece and it is an opposite piece
+			move= this.getMoveMethod(-this.displacement);	// The opposite direction
+			index= move(this.actual.index, 2);	// Separated by an empty point
+		}
+
+		// console.log(index);
+		// Start removal
+		while (index !== null && this.game[index] && this.game[index].value != this.turn) {
+			// While index is not null and the index has a piece and it is an opposite piece
+			this.board.remove(this.game[index]);	// Take pieces from the board
+			this.game[index]= 0;	// No piece there
+			index= move(index, 1);	// Next move
+		}
+	}
+	choiceMode() {
+		// Manage the choice of the piece to capture
+		let percussion= this.getMoveMethod(this.displacement)(this.actual.index, 1);	// Get the index of the piece to percute
+		let aspiration=	this.getMoveMethod(-this.displacement)(this.actual.index, 2);	// Get the index of the piece to aspire
+		// Set the 2 as capturable
+		this.game[percussion].setAsCapturable();
+		this.game[aspiration].setAsCapturable();
+		this.choices= [percussion, aspiration];	// It is a tuple with 2 elements
+	}
+	evaluate() {
+		// Evaluate moves for the actual piece and work upon it
+		// If we captured on the previous move
+		if (this.actual.canCapture) {
+			this.processMoves(this.actual);	// Recalculate actual piece moves
+			this.filterMoves();	// Filter the moves
+			// If no capture (as a second move is only allowed by captures), drop definitively
+			if (!this.actual.canCapture) {
+				// Stop and swap turn
+				this.swapTurn();
+			}
+			else {
+				// Plot valid moves
+				this.board.plot(this.actual);
+			}
+		}
+		else {
+			this.swapTurn();
+		}
+	}
+	choose(piece) {
+		// Choose the direction of the capture according to the position of the piece in the choices array
+		if (this.choices.indexOf(piece.index) == 0) {
+			// Percute
+			this.capture(true);
+			this.game[this.choices[1]].default();	// Set the other one as default value
+		}
+		else {
+			// Aspire
+			this.capture(false);
+			this.game[this.choices[0]].default();	// Set the other one as default value
+		}
+		// Reset choice to an empty array
+		this.choices= [];
+		this.evaluate();	// Evaluate moves for actual piece
+	}
 	drop(canDropHere) {
 		// Drop the piece on the object emplacement
 		this.actual.position.set(canDropHere.position.x, 0.19, canDropHere.position.z);	// Set the actual piece position
@@ -301,21 +422,28 @@ export default class Game {
 		this.setDisplacement(index);	// Set the displacement
 		// Move the piece in the game array
 		this.game[this.actual.index]= 0;	// Change the value of the previous position in the array
+		this.moveSequence.push(this.actual.index);	// Push the leaved index in the moveSequence array
 		this.game[index]= this.actual;	// Put the actual piece in its new index
 		this.actual.index= index; 	// Set the new index
-		this.moveSequence.push(index);	// Push the moveSequence array
 
-		this.processMoves(this.actual);	// Recalculate actual piece moves
-		this.filterMoves();	// Filter the moves
-		console.log(this.actual.moves, this.actual.canCapture);
-		// If no capture (as a second move is only allowed by captures), drop definitively
-		if (!this.actual.canCapture) {
-			this.actual.default();
-			this.actual= undefined;	// Reset the actual piece
+		// In case of Capture
+		if (!this.actual.moves.normalMoves) {
+			// If the index is in both percussions and aspirations
+			if (this.actual.moves.percussions.includes(index) && this.actual.moves.aspirations.includes(index)) {
+				// Enter choice mode
+				this.choiceMode();
+				return ;	// End the dropping
+			}
+			else if (this.actual.moves.percussions.includes(index)) {
+				// Percussion capture
+				this.capture();
+			}
+			else {
+				// Aspiration capture
+				this.capture(false);
+			}
 		}
-		else {
-			// Plot valid moves
-			this.board.plot(this.actual);
-		}
+
+		this.evaluate();	// Evaluate moves for actual piece
 	}
 }

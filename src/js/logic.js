@@ -26,7 +26,7 @@ const init= () => {
 	camera.position.set(0, 5, 2);
 
 	// Orbit Controls
-	// control.enabled= false;
+	control.enabled= false;
 	// control.enableZoom= false;	// No zooming
 
 	/**************************************************************************************************************************/

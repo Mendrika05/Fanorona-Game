@@ -32,6 +32,10 @@ const onBoardClick= (event, game) => {
 			game.drop(obj);	// Drop the actual piece
 			// game.actual.drop(obj);	// Pass the object to allow the dropping on the exact point
 		}
+		else if (obj.isPiece && obj.capturable) {
+			// In case of a capture conflict, we need to choose
+			game.choose(obj);	// Choose and capture the piece
+		}
 	}
 }
 
