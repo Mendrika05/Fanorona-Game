@@ -1,7 +1,7 @@
 import { Fog, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import Game from './Game';	// The game logic
-import { onBoardClick, onScreenResize, onMouseMove, onTurnEnd } from './eventHandlers2';
+import { onBoardClick, onScreenResize, onMouseMove, onTurnEnd } from './eventHandlers';
 import { renderer, scene, camera,  control, COLORS } from './constants';	// Import the basic utilities
 
 function render() {

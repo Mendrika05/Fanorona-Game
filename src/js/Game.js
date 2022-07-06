@@ -1,6 +1,6 @@
 /*************** WILL CONATIN THE GAME'S LOGIC *********************/
-import Board from './Board2';	// Board GUI
-import Piece from './Piece2';	// Piece GUI
+import Board from './Board';	// Board GUI
+import Piece from './Piece';	// Piece GUI
 import { renderer, scene, camera } from './constants';	// Import the camera to allow view swapping
 import { up, down, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
 
