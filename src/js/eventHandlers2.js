@@ -78,8 +78,14 @@ const onMouseMove= (e, board) => {
 	}
 }
 
+const onTurnEnd= (game) => {
+	// To end one's turn
+	game.swapTurn();
+}
+
 export {
 	onBoardClick,
 	onMouseMove,
-	onScreenResize
+	onScreenResize,
+	onTurnEnd
 }

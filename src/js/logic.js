@@ -1,7 +1,7 @@
 import { Fog, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import Game from './Game';	// The game logic
-import { onBoardClick, onScreenResize, onMouseMove } from './eventHandlers2';
+import { onBoardClick, onScreenResize, onMouseMove, onTurnEnd } from './eventHandlers2';
 import { renderer, scene, camera,  control, COLORS } from './constants';	// Import the basic utilities
 
 function render() {
@@ -62,6 +62,7 @@ const init= () => {
 	canvas.addEventListener('mousemove', (event) => {
 		onMouseMove(event, game.board);	// Pass the board as the second parameter
 	});
+	document.getElementById('end-turn').addEventListener('click', () => onTurnEnd(game));
 
 	render();	// Render the final results
 }

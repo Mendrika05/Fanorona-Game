@@ -130,6 +130,7 @@ export default class Game {
 		this.actual= undefined;	// Set actual piece to undefined
 		this.displacement= 0;	// Reset displacement
 		this.moveSequence= [];	// Reset move sequence
+		this.board.unplot();	// Remove the board marks
 		// Reset the colors of the pieces
 		if (this.movablePieces.length > 0) {
 			this.movablePieces.forEach((piece) => {
@@ -143,8 +144,16 @@ export default class Game {
 			this.swapView()// Turn the camera
 		}	// End if no winner yet
 		else {
+			for (let element of this.game) {
+				if (element != 0) {
+					// Recolor the pieces
+					element.setAsMovable();
+					element.movable= false;
+				}
+			}
 			alert("Player " + (this.turn == 1? "1": "2") + " won the game");
 		}
+		document.getElementById('end-turn').style.display= 'none';	// Hide it
 	}
 	swapView() {
 		// Swap the camera's view
@@ -415,6 +424,10 @@ export default class Game {
 		}
 		// Reset choice to an empty array
 		this.choices= [];
+		// Show the end-turn button
+		if (document.getElementById('end-turn').style.display == 'none') {
+			this.toggleEndTurnBtn();
+		}
 		this.evaluate();	// Evaluate moves for actual piece
 	}
 	drop(canDropHere) {
@@ -455,7 +468,18 @@ export default class Game {
 				this.capture(false);
 			}
 		}
+		// Show the end-turn button
+		if (document.getElementById('end-turn').style.display == 'none') {
+			this.toggleEndTurnBtn();
+		}
 
 		this.evaluate();	// Evaluate moves for actual piece
+	}
+	/**************************************** END TURN BUTTON ***************************************************/
+	toggleEndTurnBtn() {
+		if (document.getElementById('end-turn').style.display == 'none')
+			document.getElementById('end-turn').style.display = 'block';
+		else
+			document.getElementById('end-turn').style.display = 'none';
 	}
 }
