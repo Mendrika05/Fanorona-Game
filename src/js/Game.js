@@ -1,7 +1,7 @@
 /*************** WILL CONATIN THE GAME'S LOGIC *********************/
 import Board from './Board';	// Board GUI
 import Piece from './Piece';	// Piece GUI
-import { renderer, scene, camera } from './constants';	// Import the camera to allow view swapping
+import { renderer, scene, camera, rotationEnabled } from './constants';	// Import the camera to allow view swapping
 import { up, down, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
 
 export default class Game {
@@ -105,14 +105,10 @@ export default class Game {
 	winnerExists() {
 		// Check if there is a winner
 		let nPlayer1= 0, nPlayer2= 0;	// Number of pieces for player 1 and 2
-		for (let elt of this.game) {
-			if (nPlayer1 * nPlayer2) {
-				// No winner yet
-				return 0;
-			}
-			if (elt != 0) {
+		for (let i= 0; i < 45; i++) {
+			if (this.game[i] != 0) {
 				// If we have a piece
-				if (elt.value == 1) {
+				if (this.game[i].value == 1) {
 					// Player 1 piece
 					nPlayer1++;
 				}
@@ -121,8 +117,9 @@ export default class Game {
 					nPlayer2++;
 				}
 			}	// End if for piece selection
+			if (nPlayer1 * nPlayer2) break;	// No winner yet
 		}	// End for
-		return nPlayer1? 1: -1;	// 1 if player 1 is winning and -1 if player 2 is winning
+		return nPlayer1 * nPlayer2? 0: nPlayer1? 1: -1;	// 0 no winner yet, 1 if player 1 is winning and -1 if player 2 is winning
 	}
 	swapTurn() {
 		// Swap turn
@@ -141,8 +138,11 @@ export default class Game {
 			// If there is no winner yet
 			this.turn*= -1;	// Swap turn
 			this.processAllMoves();	// Process all moves for the Player having the turn
-			this.swapView()// Turn the camera
-		}	// End if no winner yet
+			if (rotationEnabled) {
+				this.swapView()// Turn the camera
+			}
+		}	
+		// End if no winner yet
 		else {
 			for (let element of this.game) {
 				if (element != 0) {
