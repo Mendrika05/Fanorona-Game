@@ -128,6 +128,7 @@ export default class Game {
 		this.actual= undefined;	// Set actual piece to undefined
 		this.displacement= 0;	// Reset displacement
 		this.moveSequence= [];	// Reset move sequence
+		this.captures= [];	// The capturable list
 		this.board.unplot();	// Remove the board marks
 		// Reset the colors of the pieces
 		if (this.movablePieces.length > 0) {
@@ -148,8 +149,7 @@ export default class Game {
 			for (let element of this.game) {
 				if (element != 0) {
 					// Recolor the pieces
-					element.setAsMovable();
-					element.movable= false;
+					element.removeTransparence();
 				}
 			}
 			alert("Player " + (this.turn == 1? "1": "2") + " won the game");
@@ -329,8 +329,7 @@ export default class Game {
 				}	// End if element is not 0
 				else if (element != 0) {
 					// Set opponent piece as movable because they need to be marked
-					element.setAsMovable();
-					element.movable= false;	// Make them unable to move or even be selected
+					element.removeTransparence();
 				}
 			}
 		};	// End forEach
@@ -387,9 +386,9 @@ export default class Game {
 		// Color the capturable pieces
 		// Unset previous captures
 		this.captures.forEach(index => {
-			this.game[index].setAsMovable();	// The basic color without opacity
-			this.movable= false;	// It's not movable
+			this.game[index].removeTransparence();
 		});
+
 		this.captures= [];	// Reset the captures
 		let displacement, move, index;	// The displacement of the capture, the appropriate move method and the index of the piece to color
 		if (this.actual.moves.normalMoves == undefined) {	// In a case the pieces are capturable
@@ -407,7 +406,7 @@ export default class Game {
 				}
 				// Change their color
 			}
-			for (let index of this.actual.moves.percussions) {
+			for (let index of this.actual.moves.aspirations) {
 				// Aspiration capture
 				displacement= this.getDisplacement(index);	// Get the displacement
 				move= this.getMoveMethod(-displacement);	// Get move method
@@ -456,14 +455,12 @@ export default class Game {
 		if (this.choices.indexOf(piece.index) == 0) {
 			// Percute
 			this.capture(true);
-			this.game[this.choices[1]].setAsMovable();	// Set the other one's color
-			this.game[this.choices[1]].movable= false;	// Don't allow it to move
+			this.game[this.choices[1]].removeTransparence();
 		}
 		else {
 			// Aspire
 			this.capture(false);
-			this.game[this.choices[0]].setAsMovable();	// Set the other one's color
-			this.game[this.choices[0]].movable= false;	// Don't allow it to move
+			this.game[this.choices[0]].removeTransparence();
 		}
 		// Reset choice to an empty array
 		this.choices= [];

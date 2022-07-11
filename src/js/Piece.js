@@ -42,10 +42,14 @@ export default class Piece extends Mesh {
 		// When the piece is selected
 		this.material= selectedMaterial1;
 	}
+	removeTransparence() {
+		// Set the material to transparent
+		this.material= this.value == 1? selectableMaterial1: selectableMaterial2;
+	}
 	setAsMovable() {
 		// Change material to the movable material
+		this.removeTransparence();
 		this.movable= true;
-		this.material= this.value == 1? selectableMaterial1: selectableMaterial2
 	}
 	setAsCapturable() {
 		// Set the piece as capturable
