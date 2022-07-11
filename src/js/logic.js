@@ -15,7 +15,7 @@ const init= () => {
 	// Initialization of the GUI
 
 	// Renderer setup
-	renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.01);	// Size
+	renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.01 - 50);	// Size
 	renderer.setClearColor(COLORS.DAY);	// Renderer background
 	renderer.shadowMap.enabled= true;	// Enable shadows
 
@@ -76,6 +76,39 @@ const init= () => {
 		// Update the renderer thing
 		onScreenResize(game);
 	});
+
+	// Light or night mode
+	let chk= document.getElementById('night-chk');
+	chk.addEventListener('change', () => {
+		// Toggle night and day mode
+		if (chk.checked) {
+			// Night mode
+			renderer.setClearColor(COLORS.NIGHT);
+			ambient.color.set(0xaaaaaa);	// Set ambient light
+			document.getElementById('container').style.backgroundColor= COLORS.NIGHT;	// The bottom control
+			document.body.style.color= "#ffffff";	// Change the global color
+			// Buttons configuration
+			for (let btn of document.getElementsByTagName('button')) {
+				btn.style.borderColor= "#ffffff";
+				btn.style.color= "#ffffff";
+			}
+			document.getElementById('controllers').style.borderLeftColor= "#ffffff";	// The side border
+		}
+		else {
+			// Day mode
+			renderer.setClearColor(COLORS.DAY);
+			ambient.color.set(0xffffff);	// Set ambient light
+			document.getElementById('container').style.backgroundColor= COLORS.DAY;	// The bottom control
+			document.body.style.color= "#000000";	// Change the global color
+			document.body.style.backgroundColor= COLORS.DAY;	// Background color
+			// Buttons configuration
+			for (let btn of document.getElementsByTagName('button')) {
+				btn.style.borderColor= "#000000";
+				btn.style.color= "#000000";
+			}
+			document.getElementById('controllers').style.borderLeftColor= "#000000";	// The side border
+		}
+	})
 
 	render();	// Render the final results
 }

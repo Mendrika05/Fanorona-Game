@@ -175,7 +175,7 @@ export default class Game {
 			}
 			alert("Player " + (this.turn == 1? "1": "2") + " won the game");
 		}
-		document.getElementById('end-turn').style.display= 'none';	// Hide it
+		document.getElementById('end-turn-btn').style.display= 'none';	// Hide it
 	}
 	swapView() {
 		// Swap the camera's view
@@ -493,8 +493,8 @@ export default class Game {
 		}
 		// Reset choice to an empty array
 		this.choices= [];
-		// Show the end-turn button
-		if (document.getElementById('end-turn').style.display == 'none') {
+		// Show the end-turn-btn button
+		if (document.getElementById('end-turn-btn').style.display == 'none') {
 			this.toggleEndTurnBtn();
 		}
 		this.evaluate();	// Evaluate moves for actual piece
@@ -537,8 +537,8 @@ export default class Game {
 				this.capture(false);
 			}
 		}
-		// Show the end-turn button
-		if (document.getElementById('end-turn').style.display == 'none') {
+		// Show the end-turn-btn button
+		if (document.getElementById('end-turn-btn').style.display == 'none') {
 			this.toggleEndTurnBtn();
 		}
 
@@ -546,9 +546,9 @@ export default class Game {
 	}
 	/**************************************** END TURN BUTTON ***************************************************/
 	toggleEndTurnBtn() {
-		if (document.getElementById('end-turn').style.display == 'none')
-			document.getElementById('end-turn').style.display = 'block';
+		if (document.getElementById('end-turn-btn').style.display == 'none')
+			document.getElementById('end-turn-btn').style.display = 'block';
 		else
-			document.getElementById('end-turn').style.display = 'none';
+			document.getElementById('end-turn-btn').style.display = 'none';
 	}
 }

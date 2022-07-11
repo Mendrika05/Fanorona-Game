@@ -4,7 +4,7 @@
 import { Raycaster, Vector2 } from 'three';
 import { renderer, scene, camera, COLORS, inGame } from './constants';
 
-let width= window.innerWidth / 1.2, height= window.innerHeight / 1.01;	// Canvas size by default
+let width= window.innerWidth / 1.2, height= window.innerHeight / 1.01 - 50;	// Canvas size by default
 let mousemove= new Vector2();	// To track mouse moves
 const rayCaster= new Raycaster();
 
@@ -13,7 +13,7 @@ const onScreenResize= (game) => {
 	// Help resize the screen for more responsivity
 	// Screen size
 	width= window.innerWidth / (game.inGame? 1: 1.2);
-	height= window.innerHeight / 1.01;
+	height= window.innerHeight / 1.01 - 50;	// Takeout the 60 pixels for the thing
 
 	renderer.setSize(width, height);
 
