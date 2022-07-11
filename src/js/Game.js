@@ -386,10 +386,17 @@ export default class Game {
 		// Color the capturable pieces
 		// Unset previous captures
 		this.captures.forEach(index => {
-			this.game[index].removeTransparence();
+			try {
+				// If the piece is there, there won't be a problem
+				this.game[index].removeTransparence();
+			}
+			catch {
+				// Nothing, just continue to the new iteration
+			}
 		});
 
 		this.captures= [];	// Reset the captures
+
 		let displacement, move, index;	// The displacement of the capture, the appropriate move method and the index of the piece to color
 		if (this.actual.moves.normalMoves == undefined) {	// In a case the pieces are capturable
 			for (let index of this.actual.moves.percussions) {
@@ -444,6 +451,7 @@ export default class Game {
 			else {
 				// Plot valid moves
 				this.board.plot(this.actual);
+				this.colorCapturablePieces();	// Color capturable
 			}
 		}
 		else {
