@@ -72,7 +72,7 @@ const init= () => {
 	document.getElementById('new-game').addEventListener('click', () => {
 		game.startGame();	// Start the new game
 		// Hide the side bar
-		document.getElementById('controllers').style.display= 'none';
+		document.getElementById('controllers').classList.add('hidden');
 		// Update the renderer thing
 		onScreenResize(game);
 	});

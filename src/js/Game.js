@@ -3,6 +3,7 @@ import Board from './Board';	// Board GUI
 import Piece from './Piece';	// Piece GUI
 import { renderer, scene, camera } from './constants';	// Import the camera to allow view swapping
 import { up, down, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
+import { onScreenResize } from './eventHandlers';	// When ending the game
 
 export default class Game {
 	constructor() {
@@ -16,6 +17,18 @@ export default class Game {
 			=> arrayPos= i * col + j where col is the number of column (here 9)
 			THIS IS TO MARK THE POSITION OF THE PIECE IN THE MOVE ARRAY
 		*/
+		this.board= new Board(scene);	// The game board to the global scene
+
+		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
+		let piece;
+		this.resetBoard();	// Initial Position
+		this.rotate();	// Rotate the board at initialization
+		console.log(this.getGameMatrix());
+		/************************************************** END OF PIECE PLACING **********************************************/
+	}	// End of constructor
+
+	resetBoard() {
+		// Reset the board
 		this.game= [];	// Will contain the logic
 		this.actual= undefined;	// The selected piece
 		this.displacement= 0;	// The displacement of the actual piece
@@ -23,22 +36,16 @@ export default class Game {
 		this.movablePieces= [];	// To store the piece that can move for this turn
 		this.choices= [];	// The choices array in case of capture conflict
 		this.captures= [];	// The capturable pieces on piece selection
-		this.board= new Board(scene);	// The game board to the global scene
 		this.inGame= false;	// Rotate the board while not in game
 		this.rotationEnabled= true;	// Enable rotation at each turn
-
-		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
-		let piece;
+		// Replace the pieces
 		// Player 2 pieces
 		this.defaultPlayer2Pieces();
 		// The middle line (right side)
 		this.defaultMiddlePieces();
 		// Player 1 pieces
 		this.defaultPlayer1Pieces();
-
-		this.rotate();	// Rotate the board at initialization
-		/************************************************** END OF PIECE PLACING **********************************************/
-	}	// End of constructor
+	}
 
 	startGame() {
 		// Stop rotation
@@ -47,20 +54,6 @@ export default class Game {
 		// Initialize the moves
 		this.turn= 1;	// The initial turn
 		this.processAllMoves();
-	}
-	getGameMatrix() {
-		// Getter for the game matrix representing the pieces values per indexes
-		let matrix= [];
-		let lign= [];	// Initialization
-		for (let i= 0; i < 5*9; i++) {
-			lign.push(this.game[i] != 0? this.game[i].value: 0);	// Get the values in each position
-			if (lign.length == 9) {
-				// First column
-				matrix.push(lign);
-				lign= [];
-			}
-		}
-		return matrix;
 	}
 
 	defaultPlayer1Pieces() {
@@ -109,6 +102,7 @@ export default class Game {
 			this.game.push(piece);	// The main array store the pieces to be manipulated in the logics
 		}
 	}
+
 	updateColor() {
 		// Update the color of the pieces
 		// As we are updating the color of the material, we only need to update one instance
@@ -164,9 +158,9 @@ export default class Game {
 			if (this.rotationEnabled) {
 				this.swapView()// Turn the camera
 			}
-		}	
-		// End if no winner yet
+		}	// End if no winner yet
 		else {
+			// If we have a winner
 			for (let element of this.game) {
 				if (element != 0) {
 					// Recolor the pieces
@@ -174,6 +168,13 @@ export default class Game {
 				}
 			}
 			alert("Player " + (this.turn == 1? "1": "2") + " won the game");
+
+			this.resetBoard();	// Reset the board
+			this.rotate();	// Start rotation of the board
+			// Reset the renderer and the camera
+			onScreenResize(this);
+			// Show new controllers
+			document.getElementById('controllers').classList.remove('hidden');
 		}
 		document.getElementById('end-turn-btn').style.display= 'none';	// Hide it
 	}
@@ -550,5 +551,31 @@ export default class Game {
 			document.getElementById('end-turn-btn').style.display = 'block';
 		else
 			document.getElementById('end-turn-btn').style.display = 'none';
+	}
+	/********************************** DEBUGGING METHODS *****************************************************/
+	getGameMatrix() {
+		// Getter for the game matrix representing the pieces values per indexes
+		let matrix= [];
+		let lign= [];	// Initialization
+		for (let i= 0; i < 5*9; i++) {
+			lign.push(this.game[i] != 0? this.game[i].value: 0);	// Get the values in each position
+			if (lign.length == 9) {
+				// First column
+				matrix.push(lign);
+				lign= [];
+			}
+		}
+		return matrix;
+	}
+
+	fillWithZeros(start= 0, end= 45) {
+		// For testing, fill the game array with 0 from start to end
+		if (start < end) {
+			let i= start;
+			while (i != end && i < 45) {
+				// Fill with zeros
+				this.game[i++]= 0;
+			}
+		}
 	}
 }
