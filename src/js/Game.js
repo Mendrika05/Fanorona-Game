@@ -101,7 +101,13 @@ export default class Game {
 			this.game.push(piece);	// The main array store the pieces to be manipulated in the logics
 		}
 	}
-
+	updateColor() {
+		// Update the color of the pieces
+		// As we are updating the color of the material, we only need to update one instance
+		/* WE ONLY CAN MODIFY THE PIECES COLOR AT THE BEGINNING OF THE GAME */
+		this.game[0].updateColor();	// The first
+		this.game[44].updateColor();	// The last
+	}
 	/***************************** GAME MANAGEMENT ****************************************/
 	winnerExists() {
 		// Check if there is a winner

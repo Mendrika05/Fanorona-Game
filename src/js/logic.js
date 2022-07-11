@@ -1,7 +1,7 @@
 import { Fog, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import Game from './Game';	// The game logic
-import { onBoardClick, onScreenResize, onMouseMove, onTurnEnd } from './eventHandlers';
+import { onBoardClick, onScreenResize, onMouseMove, onTurnEnd, updatePieceColor } from './eventHandlers';
 import { renderer, scene, camera,  control, COLORS } from './constants';	// Import the basic utilities
 
 function render() {
@@ -64,7 +64,11 @@ const init= () => {
 	});
 	document.getElementById('end-turn').addEventListener('click', () => onTurnEnd(game));
 
+	// Coloration on change
+	document.getElementById('player-1').addEventListener('change', () => updatePieceColor(1, game));	// Player 1
+	document.getElementById('player-2').addEventListener('change', () => updatePieceColor(-1, game));	// Player 2
+
 	render();	// Render the final results
 }
 
-init()
+init();	// Initialize the game
