@@ -25,8 +25,6 @@ const camera= new PerspectiveCamera(75, (window.innerWidth / 1.2) / (window.inne
 
 const control= new OrbitControls(camera, renderer.domElement);	// The controls
 
-let rotationEnabled= true;
-
 export {
 	COLORS,
 	scene,
@@ -35,5 +33,4 @@ export {
 	control,
 	player1Color,
 	player2Color,
-	rotationEnabled
 };

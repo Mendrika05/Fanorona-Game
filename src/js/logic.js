@@ -55,7 +55,7 @@ const init= () => {
 	/********************************************* EVENT HANDLERS ******************************************************/
 	let canvas= renderer.domElement;	// To make the process easier
 
-	window.addEventListener('resize', onScreenResize);
+	window.addEventListener('resize', () => onScreenResize(game));
 	canvas.addEventListener('click', (e) => {
 		onBoardClick(e, game);
 	});
@@ -67,6 +67,15 @@ const init= () => {
 	// Coloration on change
 	document.getElementById('player-1').addEventListener('change', () => updatePieceColor(1, game));	// Player 1
 	document.getElementById('player-2').addEventListener('change', () => updatePieceColor(-1, game));	// Player 2
+
+	// New game button management
+	document.getElementById('new-game').addEventListener('click', () => {
+		game.startGame();	// Start the new game
+		// Hide the side bar
+		document.getElementById('controllers').style.display= 'none';
+		// Update the renderer thing
+		onScreenResize(game);
+	});
 
 	render();	// Render the final results
 }

@@ -2,17 +2,17 @@
 	MANAGES THE EVENTS ON THE BOARD
 */
 import { Raycaster, Vector2 } from 'three';
-import { renderer, scene, camera, COLORS } from './constants';
+import { renderer, scene, camera, COLORS, inGame } from './constants';
 
-let width= window.innerWidth / 1.2, height= window.innerHeight / 1.01;	// Canvas size
+let width= window.innerWidth / 1.2, height= window.innerHeight / 1.01;	// Canvas size by default
 let mousemove= new Vector2();	// To track mouse moves
 const rayCaster= new Raycaster();
 
 // WINDOW EVENTS
-const onScreenResize= () => {
+const onScreenResize= (game) => {
 	// Help resize the screen for more responsivity
 	// Screen size
-	width= window.innerWidth / 1.2;
+	width= window.innerWidth / (game.inGame? 1: 1.2);
 	height= window.innerHeight / 1.01;
 
 	renderer.setSize(width, height);

@@ -1,7 +1,7 @@
 /*************** WILL CONATIN THE GAME'S LOGIC *********************/
 import Board from './Board';	// Board GUI
 import Piece from './Piece';	// Piece GUI
-import { renderer, scene, camera, rotationEnabled } from './constants';	// Import the camera to allow view swapping
+import { renderer, scene, camera } from './constants';	// Import the camera to allow view swapping
 import { up, down, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
 
 export default class Game {
@@ -24,6 +24,8 @@ export default class Game {
 		this.choices= [];	// The choices array in case of capture conflict
 		this.captures= [];	// The capturable pieces on piece selection
 		this.board= new Board(scene);	// The game board to the global scene
+		this.inGame= false;	// Rotate the board while not in game
+		this.rotationEnabled= true;	// Enable rotation at each turn
 
 		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
 		let piece;
@@ -34,12 +36,18 @@ export default class Game {
 		// Player 1 pieces
 		this.defaultPlayer1Pieces();
 
-		// Initialize the moves
-		this.turn= 1;	// The initial turn
-		this.processAllMoves();
+		this.rotate();	// Rotate the board at initialization
 		/************************************************** END OF PIECE PLACING **********************************************/
 	}	// End of constructor
 
+	startGame() {
+		// Stop rotation
+		this.inGame= true;
+		this.board.rotation.y= 0;	// Reset the board rotation
+		// Initialize the moves
+		this.turn= 1;	// The initial turn
+		this.processAllMoves();
+	}
 	getGameMatrix() {
 		// Getter for the game matrix representing the pieces values per indexes
 		let matrix= [];
@@ -108,6 +116,13 @@ export default class Game {
 		this.game[0].updateColor();	// The first
 		this.game[44].updateColor();	// The last
 	}
+	rotate() {
+		// board rotation
+		if (!this.inGame) {
+			requestAnimationFrame(this.rotate.bind(this));
+			this.board.rotation.y+= 0.001;
+		}
+	}
 	/***************************** GAME MANAGEMENT ****************************************/
 	winnerExists() {
 		// Check if there is a winner
@@ -146,7 +161,7 @@ export default class Game {
 			// If there is no winner yet
 			this.turn*= -1;	// Swap turn
 			this.processAllMoves();	// Process all moves for the Player having the turn
-			if (rotationEnabled) {
+			if (this.rotationEnabled) {
 				this.swapView()// Turn the camera
 			}
 		}	
