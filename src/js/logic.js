@@ -1,4 +1,4 @@
-import { Fog, DirectionalLight, AmbientLight } from 'three';	// The Needed Objects
+import { Fog, DirectionalLight, AmbientLight, Mesh, CircleGeometry, MeshBasicMaterial } from 'three';	// The Needed Objects
 import { AxesHelper, DirectionalLightHelper, CameraHelper } from 'three';	// Helpers
 import Game from './Game';	// The game logic
 import { onBoardClick, onScreenResize, onMouseMove, onTurnEnd, updatePieceColor } from './eventHandlers';
@@ -31,7 +31,7 @@ const init= () => {
 
 	/**************************************************************************************************************************/
 
-	// THE BOARDS
+	// THE GAME
 	/********************************************************************************************************************/
 	const game= new Game();
 	/***************************************************************************************************************************/

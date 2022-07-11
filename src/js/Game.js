@@ -23,7 +23,6 @@ export default class Game {
 		let piece;
 		this.resetBoard();	// Initial Position
 		this.rotate();	// Rotate the board at initialization
-		console.log(this.getGameMatrix());
 		/************************************************** END OF PIECE PLACING **********************************************/
 	}	// End of constructor
 

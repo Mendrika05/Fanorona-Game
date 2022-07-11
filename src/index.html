@@ -30,6 +30,18 @@
 				cursor: pointer;
 				margin: 10px 0;
 			}
+			button {
+				background: rgba(0,0,0,0);
+				border-radius: 10px;
+				width: 10vw;
+				height: 40px;
+				font-size: 1.3vw;
+				font-weight: 900;
+				cursor: pointer;
+			}
+			button:hover {
+				font-size: 1.4vw;
+			}
 			#container {
 				position: absolute;
 				height: 100%;
@@ -39,7 +51,9 @@
 				background: #0F5CD6;
 			}
 			#controllers {
+				position: relative;
 				padding-left: 10px;
+				height: 100%;
 				width: 25%;
 				border-left: 2px solid black;
 				font-weight: bold;
@@ -54,7 +68,6 @@
 			}
 			#end-turn {
 				height:  50px;
-				text-align: center;
 				display: grid;
 				place-items: center;
 				padding: 5px;
@@ -64,17 +77,9 @@
 				display: none;
 				height: 40px;
 			}
-			button {
-				background: rgba(0,0,0,0);
-				border-radius: 10px;
-				width: 10vw;
-				height: 40px;
-				font-size: 1.3vw;
-				font-weight: 900;
-				cursor: pointer;
-			}
-			button:hover {
-				font-size: 1.4vw;
+			.hidden {
+				/* Just to hide the element */
+				display: none;
 			}
 		</style>
 	</head>
