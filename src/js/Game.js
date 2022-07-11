@@ -22,6 +22,7 @@ export default class Game {
 		this.moveSequence= [];	// To store the move sequence
 		this.movablePieces= [];	// To store the piece that can move for this turn
 		this.choices= [];	// The choices array in case of capture conflict
+		this.captures= [];	// The capturable pieces on piece selection
 		this.board= new Board(scene);	// The game board to the global scene
 
 		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
@@ -180,7 +181,7 @@ export default class Game {
 		}
 	}
 	/********************************* PIECE LOGICS **************************************************/
-	setDisplacement(index) {
+	getDisplacement(index) {
 		// Return the displacement according from the actual piece index to any adjacent index: displacement is basically index.x - actual.x and index.y - this.y
 		let x= parseInt(this.actual.index / 9);	// Get the line
 		let y= this.actual.index % 9;
@@ -190,17 +191,17 @@ export default class Game {
 		let r;
 		if (x == a) {
 			// Same row
-			this.displacement= y > b? -1: 1;
+			return y > b? -1: 1;
 		}
 		else if (y == b) {
 			// Same column
-			this.displacement= x > a? -9: 9;
+			return x > a? -9: 9;
 		}
 		else if (x > a) {
-			this.displacement= y > b? -10: -8;
+			return y > b? -10: -8;
 		}
 		else 
-			this.displacement= y > b? 8: 10;
+			return y > b? 8: 10;
 	}
 	getMoveMethod(displacement) {
 		// Get the move method according to a given displacement
@@ -353,6 +354,9 @@ export default class Game {
 		piece.select();	// UI
 		// Plot the moves of the actual piece on the board
 		this.board.plot(piece);
+
+		// Color capturable pieces
+		this.colorCapturablePieces();
 	}
 	capture(isPercussion= true) {
 		// Capture logic
@@ -377,6 +381,45 @@ export default class Game {
 			this.board.remove(this.game[index]);	// Take pieces from the board
 			this.game[index]= 0;	// No piece there
 			index= move(index, 1);	// Next move
+		}
+	}
+	colorCapturablePieces() {
+		// Color the capturable pieces
+		// Unset previous captures
+		this.captures.forEach(index => {
+			this.game[index].setAsMovable();	// The basic color without opacity
+			this.movable= false;	// It's not movable
+		});
+		this.captures= [];	// Reset the captures
+		let displacement, move, index;	// The displacement of the capture, the appropriate move method and the index of the piece to color
+		if (this.actual.moves.normalMoves == undefined) {	// In a case the pieces are capturable
+			for (let index of this.actual.moves.percussions) {
+				// Percussion capture
+				displacement= this.getDisplacement(index);	// Get the displacement
+				move= this.getMoveMethod(displacement);	// Get move method
+
+				// Loop through the capturable pieces
+				index= move(this.actual.index, 2);	// Up 2 because ther is a gap between the 2 pieces
+				while (index !== null && this.game[index] && this.game[index].value != this.turn) {
+					this.game[index].default();
+					this.captures.push(index);	// Push the piece in the captures array to ease its control
+					index= move(index, 1);	// Next move
+				}
+				// Change their color
+			}
+			for (let index of this.actual.moves.percussions) {
+				// Aspiration capture
+				displacement= this.getDisplacement(index);	// Get the displacement
+				move= this.getMoveMethod(-displacement);	// Get move method
+
+				// Loop through the capturable pieces
+				index= move(this.actual.index, 1);	// Up 2 because ther is a gap between the 2 pieces
+				while (index !== null && this.game[index] && this.game[index].value != this.turn) {
+					this.game[index].default();
+					this.captures.push(index);	// Push the piece in the captures array to ease its control
+					index= move(index, 1);	// Next move
+				}
+			}
 		}
 	}
 	choiceMode() {
@@ -444,7 +487,7 @@ export default class Game {
 		// New index is given by 9 * (canDropHere.position.z + 2) + canDropHere.position.x + 4
 		let index= 9 * (canDropHere.position.z + 2) + canDropHere.position.x + 4;
 		
-		this.setDisplacement(index);	// Set the displacement
+		this.displacement= this.getDisplacement(index);	// Set the displacement
 		// Move the piece in the game array
 		this.game[this.actual.index]= 0;	// Change the value of the previous position in the array
 		this.moveSequence.push(this.actual.index);	// Push the leaved index in the moveSequence array
