@@ -67,6 +67,7 @@ const init= () => {
 	// Coloration on change
 	document.getElementById('player-1').addEventListener('change', () => updatePieceColor(1, game));	// Player 1
 	document.getElementById('player-2').addEventListener('change', () => updatePieceColor(-1, game));	// Player 2
+	
 
 	// New game button management
 	document.getElementById('turn').style.display= 'none';
@@ -76,7 +77,7 @@ const init= () => {
 		document.getElementById('controllers').classList.add('hidden');
 		document.getElementById('turn').style.display= 'block';
 		//
-		document.getElementById('curplcol').style.backgroundColor= this.turn==1?COLORS.PLAYER1:PLAYER2;
+		
 		
 		// Update the renderer thing
 		onScreenResize(game);

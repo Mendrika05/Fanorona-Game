@@ -181,6 +181,8 @@ export default class Game {
 			document.getElementById('controllers').classList.remove('hidden');
 		}
 		document.getElementById('end-turn-btn').style.display= 'none';	// Hide it
+		
+	
 	}
 	swapView() {
 		// Swap the camera's view
