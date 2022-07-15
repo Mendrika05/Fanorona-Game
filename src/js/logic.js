@@ -69,10 +69,15 @@ const init= () => {
 	document.getElementById('player-2').addEventListener('change', () => updatePieceColor(-1, game));	// Player 2
 
 	// New game button management
+	document.getElementById('turn').style.display= 'none';
 	document.getElementById('new-game').addEventListener('click', () => {
 		game.startGame();	// Start the new game
 		// Hide the side bar
 		document.getElementById('controllers').classList.add('hidden');
+		document.getElementById('turn').style.display= 'block';
+		//
+		document.getElementById('curplcol').style.backgroundColor= this.turn==1?COLORS.PLAYER1:PLAYER2;
+		
 		// Update the renderer thing
 		onScreenResize(game);
 	});

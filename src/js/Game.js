@@ -26,6 +26,7 @@ export default class Game {
 		/************************************************** END OF PIECE PLACING **********************************************/
 	}	// End of constructor
 
+	
 	resetBoard() {
 		// Reset the board
 		this.game= [];	// Will contain the logic
@@ -52,9 +53,10 @@ export default class Game {
 		this.board.rotation.y= 0;	// Reset the board rotation
 		// Initialize the moves
 		this.turn= 1;	// The initial turn
+		
 		this.processAllMoves();
 	}
-
+	
 	defaultPlayer1Pieces() {
 		// Place the default player 1 pieces
 		let piece;
@@ -108,6 +110,8 @@ export default class Game {
 		/* WE ONLY CAN MODIFY THE PIECES COLOR AT THE BEGINNING OF THE GAME */
 		this.game[0].updateColor();	// The first
 		this.game[44].updateColor();	// The last
+		
+		
 	}
 	rotate() {
 		// board rotation
@@ -144,6 +148,7 @@ export default class Game {
 		this.moveSequence= [];	// Reset move sequence
 		this.captures= [];	// The capturable list
 		this.board.unplot();	// Remove the board marks
+		
 		// Reset the colors of the pieces
 		if (this.movablePieces.length > 0) {
 			this.movablePieces.forEach((piece) => {
@@ -200,6 +205,7 @@ export default class Game {
 				camera.position.x-= 0.01;	
 			}
 		}
+		
 	}
 	/********************************* PIECE LOGICS **************************************************/
 	getDisplacement(index) {

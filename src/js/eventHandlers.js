@@ -81,6 +81,7 @@ const onMouseMove= (e, board) => {
 const onTurnEnd= (game) => {
 	// To end one's turn
 	game.swapTurn();
+	document.getElementById('curplcol').style.backgroundColor= (this.turn==1?COLORS.PLAYER1:PLAYER2);
 }
 
 const updatePieceColor= (player, game) => {
