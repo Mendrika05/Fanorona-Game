@@ -2,18 +2,18 @@
 	MANAGES THE EVENTS ON THE BOARD
 */
 import { Raycaster, Vector2 } from 'three';
-import { renderer, scene, camera } from './constants';
+import { renderer, scene, camera, COLORS, inGame } from './constants';
 
-let width= window.innerWidth / 1.2, height= window.innerHeight / 1.01;	// Canvas size
+let width= window.innerWidth / 1.2, height= window.innerHeight / 1.01 - 50;	// Canvas size by default
 let mousemove= new Vector2();	// To track mouse moves
 const rayCaster= new Raycaster();
 
 // WINDOW EVENTS
-const onScreenResize= () => {
+const onScreenResize= (game) => {
 	// Help resize the screen for more responsivity
 	// Screen size
-	width= window.innerWidth / 1.2;
-	height= window.innerHeight / 1.01;
+	width= window.innerWidth / (game.inGame? 1: 1.2);
+	height= window.innerHeight / 1.01 - 50;	// Takeout the 60 pixels for the thing
 
 	renderer.setSize(width, height);
 
@@ -83,9 +83,44 @@ const onTurnEnd= (game) => {
 	game.swapTurn();
 }
 
+const updatePieceColor= (player, game) => {
+	let input=  document.getElementById(`player-${player == 1? 1: 2}`);// Get the correct input
+	let color= input.value;	// Get the color
+	// Filter the colors
+	// It can't be the capturable or selection color
+	if (color == COLORS.CAPTURABLE || color == COLORS.SELECTION) {
+		alert("Please choose another color as this one is identic to a game constant");
+		input.value= player == 1? COLORS.PLAYER1: PLAYER2;	// Reset the initial value
+		return;	// End the function
+	}
+	// Update the color in the COLORS thingy
+	if (player == 1) {
+		// Player 1
+		// Filter the color
+		if (COLORS.PLAYER2 == color) {
+			alert("Players can't have the same color of piece");
+			input.value= player == 1? COLORS.PLAYER1: COLORS.PLAYER2;	// Reset the initial value
+			return;
+		}
+		COLORS.PLAYER1= color;
+	}
+	else {
+		// Player 2
+		// Filter the color
+		if (COLORS.PLAYER1 == color) {
+			alert("Players can't have the same color of piece");
+			input.value= player == 1? COLORS.PLAYER1: COLORS.PLAYER2;	// Reset the initial value
+			return;
+		}
+		COLORS.PLAYER2= color;
+	}
+	game.updateColor();	// Update the color on the board game
+}
+
 export {
 	onBoardClick,
 	onMouseMove,
 	onScreenResize,
-	onTurnEnd
+	onTurnEnd,
+	updatePieceColor
 }

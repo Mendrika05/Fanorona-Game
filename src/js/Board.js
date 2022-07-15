@@ -75,8 +75,6 @@ export default class Board extends Mesh {
 	}
 	plot(piece) {
 		// Plot a mark at all the valid moves for a given piece
-		
-
 		for (let move in piece.moves) {
 			for (let point of piece.moves[move]) {
 				let mark= new Mesh(plotGeometry, plotMaterial);

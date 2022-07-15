@@ -6,13 +6,14 @@ let player2Color= document.getElementById('player-2');
 
 // Colors definitions
 const COLORS= {
-		PLAYER1: 0x333333,
-		PLAYER2: 0xffffff,
-		SELECTION: 0xE4D814,
+		PLAYER1: "#333333",
+		PLAYER2: "#ffffff",
+		SELECTION: "#e4d814",
 		BOARD: 0x83390D,
 		TABLE: 0x432611,
-		NIGHT: 0x0B0848,
-		DAY: 0xF5CD6
+		NIGHT: "#0B0848",
+		DAY: "#0F5CD6",
+		CAPTURABLE: "#990000"
 	};
 
 
@@ -20,7 +21,7 @@ const renderer= new WebGLRenderer({
 	canvas: document.getElementById('canvas'),
 });	// Renderer
 const scene= new Scene();	// Scene
-const camera= new PerspectiveCamera(75, (window.innerWidth / 1.2) / (window.innerHeight / 1.01), 0.5, 100);	// Camera
+const camera= new PerspectiveCamera(75, (window.innerWidth / 1.2) / (window.innerHeight / 1.01 - 50), 0.5, 100);	// Camera
 
 const control= new OrbitControls(camera, renderer.domElement);	// The controls
 
@@ -31,5 +32,5 @@ export {
 	camera,
 	control,
 	player1Color,
-	player2Color
+	player2Color,
 };

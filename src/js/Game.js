@@ -3,6 +3,7 @@ import Board from './Board';	// Board GUI
 import Piece from './Piece';	// Piece GUI
 import { renderer, scene, camera } from './constants';	// Import the camera to allow view swapping
 import { up, down, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
+import { onScreenResize } from './eventHandlers';	// When ending the game
 
 export default class Game {
 	constructor() {
@@ -16,42 +17,42 @@ export default class Game {
 			=> arrayPos= i * col + j where col is the number of column (here 9)
 			THIS IS TO MARK THE POSITION OF THE PIECE IN THE MOVE ARRAY
 		*/
+		this.board= new Board(scene);	// The game board to the global scene
+
+		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
+		let piece;
+		this.resetBoard();	// Initial Position
+		this.rotate();	// Rotate the board at initialization
+		/************************************************** END OF PIECE PLACING **********************************************/
+	}	// End of constructor
+
+	resetBoard() {
+		// Reset the board
 		this.game= [];	// Will contain the logic
 		this.actual= undefined;	// The selected piece
 		this.displacement= 0;	// The displacement of the actual piece
 		this.moveSequence= [];	// To store the move sequence
 		this.movablePieces= [];	// To store the piece that can move for this turn
 		this.choices= [];	// The choices array in case of capture conflict
-		this.board= new Board(scene);	// The game board to the global scene
-
-		/************************ PLACING THE PIECES ON THE BOARD WITH DEFAULT DISPOSITION ******************************************/
-		let piece;
+		this.captures= [];	// The capturable pieces on piece selection
+		this.inGame= false;	// Rotate the board while not in game
+		this.rotationEnabled= true;	// Enable rotation at each turn
+		// Replace the pieces
 		// Player 2 pieces
 		this.defaultPlayer2Pieces();
 		// The middle line (right side)
 		this.defaultMiddlePieces();
 		// Player 1 pieces
 		this.defaultPlayer1Pieces();
+	}
 
+	startGame() {
+		// Stop rotation
+		this.inGame= true;
+		this.board.rotation.y= 0;	// Reset the board rotation
 		// Initialize the moves
 		this.turn= 1;	// The initial turn
 		this.processAllMoves();
-		/************************************************** END OF PIECE PLACING **********************************************/
-	}	// End of constructor
-
-	getGameMatrix() {
-		// Getter for the game matrix representing the pieces values per indexes
-		let matrix= [];
-		let lign= [];	// Initialization
-		for (let i= 0; i < 5*9; i++) {
-			lign.push(this.game[i] != 0? this.game[i].value: 0);	// Get the values in each position
-			if (lign.length == 9) {
-				// First column
-				matrix.push(lign);
-				lign= [];
-			}
-		}
-		return matrix;
 	}
 
 	defaultPlayer1Pieces() {
@@ -101,18 +102,28 @@ export default class Game {
 		}
 	}
 
+	updateColor() {
+		// Update the color of the pieces
+		// As we are updating the color of the material, we only need to update one instance
+		/* WE ONLY CAN MODIFY THE PIECES COLOR AT THE BEGINNING OF THE GAME */
+		this.game[0].updateColor();	// The first
+		this.game[44].updateColor();	// The last
+	}
+	rotate() {
+		// board rotation
+		if (!this.inGame) {
+			requestAnimationFrame(this.rotate.bind(this));
+			this.board.rotation.y+= 0.001;
+		}
+	}
 	/***************************** GAME MANAGEMENT ****************************************/
 	winnerExists() {
 		// Check if there is a winner
 		let nPlayer1= 0, nPlayer2= 0;	// Number of pieces for player 1 and 2
-		for (let elt of this.game) {
-			if (nPlayer1 * nPlayer2) {
-				// No winner yet
-				return 0;
-			}
-			if (elt != 0) {
+		for (let i= 0; i < 45; i++) {
+			if (this.game[i] != 0) {
 				// If we have a piece
-				if (elt.value == 1) {
+				if (this.game[i].value == 1) {
 					// Player 1 piece
 					nPlayer1++;
 				}
@@ -121,8 +132,9 @@ export default class Game {
 					nPlayer2++;
 				}
 			}	// End if for piece selection
+			if (nPlayer1 * nPlayer2) break;	// No winner yet
 		}	// End for
-		return nPlayer1? 1: -1;	// 1 if player 1 is winning and -1 if player 2 is winning
+		return nPlayer1 * nPlayer2? 0: nPlayer1? 1: -1;	// 0 no winner yet, 1 if player 1 is winning and -1 if player 2 is winning
 	}
 	swapTurn() {
 		// Swap turn
@@ -130,6 +142,7 @@ export default class Game {
 		this.actual= undefined;	// Set actual piece to undefined
 		this.displacement= 0;	// Reset displacement
 		this.moveSequence= [];	// Reset move sequence
+		this.captures= [];	// The capturable list
 		this.board.unplot();	// Remove the board marks
 		// Reset the colors of the pieces
 		if (this.movablePieces.length > 0) {
@@ -141,19 +154,28 @@ export default class Game {
 			// If there is no winner yet
 			this.turn*= -1;	// Swap turn
 			this.processAllMoves();	// Process all moves for the Player having the turn
-			this.swapView()// Turn the camera
+			if (this.rotationEnabled) {
+				this.swapView()// Turn the camera
+			}
 		}	// End if no winner yet
 		else {
+			// If we have a winner
 			for (let element of this.game) {
 				if (element != 0) {
 					// Recolor the pieces
-					element.setAsMovable();
-					element.movable= false;
+					element.removeTransparence();
 				}
 			}
 			alert("Player " + (this.turn == 1? "1": "2") + " won the game");
+
+			this.resetBoard();	// Reset the board
+			this.rotate();	// Start rotation of the board
+			// Reset the renderer and the camera
+			onScreenResize(this);
+			// Show new controllers
+			document.getElementById('controllers').classList.remove('hidden');
 		}
-		document.getElementById('end-turn').style.display= 'none';	// Hide it
+		document.getElementById('end-turn-btn').style.display= 'none';	// Hide it
 	}
 	swapView() {
 		// Swap the camera's view
@@ -180,7 +202,7 @@ export default class Game {
 		}
 	}
 	/********************************* PIECE LOGICS **************************************************/
-	setDisplacement(index) {
+	getDisplacement(index) {
 		// Return the displacement according from the actual piece index to any adjacent index: displacement is basically index.x - actual.x and index.y - this.y
 		let x= parseInt(this.actual.index / 9);	// Get the line
 		let y= this.actual.index % 9;
@@ -190,17 +212,17 @@ export default class Game {
 		let r;
 		if (x == a) {
 			// Same row
-			this.displacement= y > b? -1: 1;
+			return y > b? -1: 1;
 		}
 		else if (y == b) {
 			// Same column
-			this.displacement= x > a? -9: 9;
+			return x > a? -9: 9;
 		}
 		else if (x > a) {
-			this.displacement= y > b? -10: -8;
+			return y > b? -10: -8;
 		}
 		else 
-			this.displacement= y > b? 8: 10;
+			return y > b? 8: 10;
 	}
 	getMoveMethod(displacement) {
 		// Get the move method according to a given displacement
@@ -328,8 +350,7 @@ export default class Game {
 				}	// End if element is not 0
 				else if (element != 0) {
 					// Set opponent piece as movable because they need to be marked
-					element.setAsMovable();
-					element.movable= false;	// Make them unable to move or even be selected
+					element.removeTransparence();
 				}
 			}
 		};	// End forEach
@@ -353,6 +374,9 @@ export default class Game {
 		piece.select();	// UI
 		// Plot the moves of the actual piece on the board
 		this.board.plot(piece);
+
+		// Color capturable pieces
+		this.colorCapturablePieces();
 	}
 	capture(isPercussion= true) {
 		// Capture logic
@@ -379,6 +403,52 @@ export default class Game {
 			index= move(index, 1);	// Next move
 		}
 	}
+	colorCapturablePieces() {
+		// Color the capturable pieces
+		// Unset previous captures
+		this.captures.forEach(index => {
+			try {
+				// If the piece is there, there won't be a problem
+				this.game[index].removeTransparence();
+			}
+			catch {
+				// Nothing, just continue to the new iteration
+			}
+		});
+
+		this.captures= [];	// Reset the captures
+
+		let displacement, move, index;	// The displacement of the capture, the appropriate move method and the index of the piece to color
+		if (this.actual.moves.normalMoves == undefined) {	// In a case the pieces are capturable
+			for (let index of this.actual.moves.percussions) {
+				// Percussion capture
+				displacement= this.getDisplacement(index);	// Get the displacement
+				move= this.getMoveMethod(displacement);	// Get move method
+
+				// Loop through the capturable pieces
+				index= move(this.actual.index, 2);	// Up 2 because ther is a gap between the 2 pieces
+				while (index !== null && this.game[index] && this.game[index].value != this.turn) {
+					this.game[index].default();
+					this.captures.push(index);	// Push the piece in the captures array to ease its control
+					index= move(index, 1);	// Next move
+				}
+				// Change their color
+			}
+			for (let index of this.actual.moves.aspirations) {
+				// Aspiration capture
+				displacement= this.getDisplacement(index);	// Get the displacement
+				move= this.getMoveMethod(-displacement);	// Get move method
+
+				// Loop through the capturable pieces
+				index= move(this.actual.index, 1);	// Up 2 because ther is a gap between the 2 pieces
+				while (index !== null && this.game[index] && this.game[index].value != this.turn) {
+					this.game[index].default();
+					this.captures.push(index);	// Push the piece in the captures array to ease its control
+					index= move(index, 1);	// Next move
+				}
+			}
+		}
+	}
 	choiceMode() {
 		// Manage the choice of the piece to capture
 		let percussion= this.getMoveMethod(this.displacement)(this.actual.index, 1);	// Get the index of the piece to percute
@@ -402,6 +472,7 @@ export default class Game {
 			else {
 				// Plot valid moves
 				this.board.plot(this.actual);
+				this.colorCapturablePieces();	// Color capturable
 			}
 		}
 		else {
@@ -413,19 +484,17 @@ export default class Game {
 		if (this.choices.indexOf(piece.index) == 0) {
 			// Percute
 			this.capture(true);
-			this.game[this.choices[1]].setAsMovable();	// Set the other one's color
-			this.game[this.choices[1]].movable= false;	// Don't allow it to move
+			this.game[this.choices[1]].removeTransparence();
 		}
 		else {
 			// Aspire
 			this.capture(false);
-			this.game[this.choices[0]].setAsMovable();	// Set the other one's color
-			this.game[this.choices[0]].movable= false;	// Don't allow it to move
+			this.game[this.choices[0]].removeTransparence();
 		}
 		// Reset choice to an empty array
 		this.choices= [];
-		// Show the end-turn button
-		if (document.getElementById('end-turn').style.display == 'none') {
+		// Show the end-turn-btn button
+		if (document.getElementById('end-turn-btn').style.display == 'none') {
 			this.toggleEndTurnBtn();
 		}
 		this.evaluate();	// Evaluate moves for actual piece
@@ -444,7 +513,7 @@ export default class Game {
 		// New index is given by 9 * (canDropHere.position.z + 2) + canDropHere.position.x + 4
 		let index= 9 * (canDropHere.position.z + 2) + canDropHere.position.x + 4;
 		
-		this.setDisplacement(index);	// Set the displacement
+		this.displacement= this.getDisplacement(index);	// Set the displacement
 		// Move the piece in the game array
 		this.game[this.actual.index]= 0;	// Change the value of the previous position in the array
 		this.moveSequence.push(this.actual.index);	// Push the leaved index in the moveSequence array
@@ -468,8 +537,8 @@ export default class Game {
 				this.capture(false);
 			}
 		}
-		// Show the end-turn button
-		if (document.getElementById('end-turn').style.display == 'none') {
+		// Show the end-turn-btn button
+		if (document.getElementById('end-turn-btn').style.display == 'none') {
 			this.toggleEndTurnBtn();
 		}
 
@@ -477,9 +546,35 @@ export default class Game {
 	}
 	/**************************************** END TURN BUTTON ***************************************************/
 	toggleEndTurnBtn() {
-		if (document.getElementById('end-turn').style.display == 'none')
-			document.getElementById('end-turn').style.display = 'block';
+		if (document.getElementById('end-turn-btn').style.display == 'none')
+			document.getElementById('end-turn-btn').style.display = 'block';
 		else
-			document.getElementById('end-turn').style.display = 'none';
+			document.getElementById('end-turn-btn').style.display = 'none';
+	}
+	/********************************** DEBUGGING METHODS *****************************************************/
+	getGameMatrix() {
+		// Getter for the game matrix representing the pieces values per indexes
+		let matrix= [];
+		let lign= [];	// Initialization
+		for (let i= 0; i < 5*9; i++) {
+			lign.push(this.game[i] != 0? this.game[i].value: 0);	// Get the values in each position
+			if (lign.length == 9) {
+				// First column
+				matrix.push(lign);
+				lign= [];
+			}
+		}
+		return matrix;
+	}
+
+	fillWithZeros(start= 0, end= 45) {
+		// For testing, fill the game array with 0 from start to end
+		if (start < end) {
+			let i= start;
+			while (i != end && i < 45) {
+				// Fill with zeros
+				this.game[i++]= 0;
+			}
+		}
 	}
 }
