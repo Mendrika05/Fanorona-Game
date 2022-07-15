@@ -1,7 +1,7 @@
 /*************** WILL CONATIN THE GAME'S LOGIC *********************/
 import Board from './Board';	// Board GUI
 import Piece from './Piece';	// Piece GUI
-import { renderer, scene, camera } from './constants';	// Import the camera to allow view swapping
+import { renderer, scene, camera, COLORS } from './constants';	// Import the camera to allow view swapping
 import { up, down, left, right, upperLeft, upperRight, lowerLeft, lowerRight, Mover } from './moves';
 import { onScreenResize } from './eventHandlers';	// When ending the game
 
@@ -53,8 +53,10 @@ export default class Game {
 		this.board.rotation.y= 0;	// Reset the board rotation
 		// Initialize the moves
 		this.turn= 1;	// The initial turn
-		
 		this.processAllMoves();
+		// Show the player turn indicator: curplcol
+		document.getElementById("curplcol").style.display= "inline-block";
+		document.getElementById("curplcol").style.backgroundColor= COLORS.PLAYER1;	// PLayer 1 stars the game
 	}
 	
 	defaultPlayer1Pieces() {
@@ -159,6 +161,8 @@ export default class Game {
 			// If there is no winner yet
 			this.turn*= -1;	// Swap turn
 			this.processAllMoves();	// Process all moves for the Player having the turn
+			document.getElementById('curplcol').style.backgroundColor= this.turn==1?COLORS.PLAYER1:COLORS.PLAYER2;
+
 			if (this.rotationEnabled) {
 				this.swapView()// Turn the camera
 			}
@@ -179,6 +183,8 @@ export default class Game {
 			onScreenResize(this);
 			// Show new controllers
 			document.getElementById('controllers').classList.remove('hidden');
+			// Remove turn indicator
+			document.getElementById('curplcol').style.display= 'none';
 		}
 		document.getElementById('end-turn-btn').style.display= 'none';	// Hide it
 		

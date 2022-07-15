@@ -70,12 +70,13 @@ const init= () => {
 	
 
 	// New game button management
-	document.getElementById('turn').style.display= 'none';
+	// document.getElementById('turn').style.display= 'none';
 	document.getElementById('new-game').addEventListener('click', () => {
 		game.startGame();	// Start the new game
 		// Hide the side bar
 		document.getElementById('controllers').classList.add('hidden');
-		document.getElementById('turn').style.display= 'block';
+		
+		// document.getElementById('turn').style.display= 'block';
 		//
 		
 		
